@@ -11,10 +11,25 @@ import {
   MoreVertical,
 } from "lucide-react";
 
-import StatusBadge from "./StatusBadge";
+import Badge from "@/components/common/Badge";
 
 interface Props {
   withdrawal: any;
+}
+
+function statusVariant(
+  status: string
+): "success" | "warning" | "danger" | "secondary" {
+  switch (status) {
+    case "approved":
+      return "success";
+    case "pending":
+      return "warning";
+    case "rejected":
+      return "danger";
+    default:
+      return "secondary";
+  }
 }
 
 export default function WithdrawalRow({
@@ -55,9 +70,9 @@ export default function WithdrawalRow({
 
           <div className="flex items-center gap-5">
 
-            <StatusBadge
-              status={withdrawal.status}
-            />
+            <Badge variant={statusVariant(withdrawal.status)}>
+              {withdrawal.status}
+            </Badge>
 
             <div className="flex items-center gap-2">
 
@@ -307,9 +322,9 @@ export default function WithdrawalRow({
 
           </div>
 
-          <StatusBadge
-            status={withdrawal.status}
-          />
+          <Badge variant={statusVariant(withdrawal.status)}>
+            {withdrawal.status}
+          </Badge>
 
         </div>
 

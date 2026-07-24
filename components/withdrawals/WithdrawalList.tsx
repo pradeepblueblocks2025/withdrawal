@@ -1,7 +1,7 @@
 "use client";
 
 import WithdrawalRow from "./WithdrawalRow";
-import EmptyState from "./EmptyState";
+import EmptyState from "@/components/common/EmptyState";
 import { Withdrawal } from "@/types/withdrawal";
 
 interface Props {

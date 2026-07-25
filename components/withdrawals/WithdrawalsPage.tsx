@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 
 import GridToolbar from "@/components/datagrid/GridToolbar";
@@ -63,6 +63,9 @@ export default function WithdrawalsPage({
   const [totalRecords, setTotalRecords] = useState(0);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedMeta, setSelectedMeta] = useState<
+    Record<string, { token: string; amount: number }>
+  >({});
 
   const [copiedField, setCopiedField] = useState<{
     id: string;
@@ -84,6 +87,11 @@ export default function WithdrawalsPage({
 
   const hasLoadedOnce = useRef(false);
   const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    setSelectedIds([]);
+    setSelectedMeta({});
+  }, [website]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -139,21 +147,74 @@ export default function WithdrawalsPage({
     setSearch(value);
   };
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((x) => x !== id)
-        : [...prev, id]
-    );
+  const toggleSelect = (row: Withdrawal) => {
+    const id = row._id;
+    setSelectedIds((prev) => {
+      const isSelected = prev.includes(id);
+      setSelectedMeta((meta) => {
+        if (isSelected) {
+          const next = { ...meta };
+          delete next[id];
+          return next;
+        }
+        return {
+          ...meta,
+          [id]: {
+            token: (row.token || "N/A").toUpperCase(),
+            amount: Number(row.amount) || 0,
+          },
+        };
+      });
+      return isSelected ? prev.filter((x) => x !== id) : [...prev, id];
+    });
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === withdrawals.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(withdrawals.map((item) => item._id));
+    const allSelected =
+      withdrawals.length > 0 &&
+      withdrawals.every((item) => selectedIds.includes(item._id));
+
+    if (allSelected) {
+      const pageIds = new Set(withdrawals.map((item) => item._id));
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.has(id)));
+      setSelectedMeta((meta) => {
+        const next = { ...meta };
+        for (const id of pageIds) delete next[id];
+        return next;
+      });
+      return;
     }
+
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      for (const item of withdrawals) next.add(item._id);
+      return Array.from(next);
+    });
+    setSelectedMeta((meta) => {
+      const next = { ...meta };
+      for (const item of withdrawals) {
+        next[item._id] = {
+          token: (item.token || "N/A").toUpperCase(),
+          amount: Number(item.amount) || 0,
+        };
+      }
+      return next;
+    });
   };
+
+  const selectedTokenTotals = useMemo(() => {
+    const totals = new Map<string, number>();
+
+    for (const id of selectedIds) {
+      const item = selectedMeta[id];
+      if (!item) continue;
+      totals.set(item.token, (totals.get(item.token) || 0) + item.amount);
+    }
+
+    return Array.from(totals.entries()).sort(([a], [b]) =>
+      a.localeCompare(b)
+    );
+  }, [selectedIds, selectedMeta]);
 
   const handleDateRangeChange = (value: string) => {
     setPage(1);
@@ -171,6 +232,7 @@ export default function WithdrawalsPage({
       setBulkLoading(true);
       await bulkApproveWithdrawals(selectedIds);
       setSelectedIds([]);
+      setSelectedMeta({});
       setShowBulkApproveConfirm(false);
       await loadData();
     } catch (err) {
@@ -282,7 +344,7 @@ export default function WithdrawalsPage({
           <input
             type="checkbox"
             checked={selectedIds.includes(row._id)}
-            onChange={() => toggleSelect(row._id)}
+            onChange={() => toggleSelect(row)}
             className="h-4 w-4 shrink-0 rounded border-slate-300"
           />
           <div className="min-w-0">
@@ -566,7 +628,7 @@ export default function WithdrawalsPage({
             type="checkbox"
             checked={
               withdrawals.length > 0 &&
-              selectedIds.length === withdrawals.length
+              withdrawals.every((item) => selectedIds.includes(item._id))
             }
             onChange={toggleSelectAll}
             className="h-4 w-4 rounded border-slate-300"
@@ -586,6 +648,24 @@ export default function WithdrawalsPage({
           Approve Selected
           {selectedIds.length > 0 && ` (${selectedIds.length})`}
         </Button>
+
+        {selectedIds.length > 0 &&
+          selectedTokenTotals.map(([tokenName, total]) => (
+            <span
+              key={tokenName}
+              className="inline-flex items-center gap-1.5 text-sm"
+            >
+              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                {tokenName}
+              </span>
+              <span className="font-medium text-green-600 dark:text-green-400">
+                {total.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </span>
+          ))}
       </div>
 
       <DataGrid columns={columns} data={withdrawals} loading={loading} />

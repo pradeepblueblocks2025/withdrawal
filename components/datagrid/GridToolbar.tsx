@@ -1,17 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 import SearchBox from "@/components/common/SearchBox";
 import {
   ChevronDown,
   ChevronUp,
-  Coins,
   Download,
-  FileText,
   RotateCw,
   Search,
-  Wallet,
 } from "lucide-react";
 
 interface FilterOption {
@@ -54,9 +52,8 @@ export default function GridToolbar({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl bg-gradient-to-r from-[#ebe4ff] via-[#f3eeff] to-[#f8f7fc] px-6 py-5 shadow-sm dark:from-[#2a1f5e] dark:via-[#2d2668] dark:to-[#1e293b]">
-        <div className="grid grid-cols-1 items-center gap-4 lg:grid-cols-[minmax(0,1fr)_140px_auto]">
-          {/* Left: title */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#ebe4ff] via-[#f3eeff] to-[#f8f7fc] px-6 py-5 shadow-sm dark:from-[#2a1f5e] dark:via-[#2d2668] dark:to-[#1e293b]">
+        <div className="relative z-10 grid grid-cols-1 items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
           <div className="min-w-0">
             {title && (
               <h2 className="truncate text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -70,22 +67,33 @@ export default function GridToolbar({
             )}
           </div>
 
-          {/* Center: simple graphic */}
-          <div className="hidden items-center justify-center lg:flex" aria-hidden>
-            <div className="relative h-14 w-24">
-              <span className="absolute left-0 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-amber-300 text-amber-700 shadow-sm">
-                <Coins size={16} />
-              </span>
-              <span className="absolute left-7 top-0 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-md">
-                <Wallet size={22} />
-              </span>
-              <span className="absolute right-0 top-4 flex h-8 w-7 items-center justify-center rounded-md bg-white text-violet-500 shadow-sm dark:bg-slate-100">
-                <FileText size={14} />
-              </span>
+          <div
+            className="pointer-events-none relative mx-auto hidden h-[88px] w-[160px] md:block lg:mx-0"
+            aria-hidden
+          >
+            {/* Light mode: blend soft lavender bg into banner */}
+            <Image
+              src="/withdrawal-banner.png"
+              alt=""
+              fill
+              sizes="160px"
+              priority
+              className="object-contain object-center scale-110 dark:hidden"
+            />
+            {/* Dark mode: lift subject, soften light plate behind image */}
+            <div className="absolute inset-0 hidden dark:block">
+              <div className="absolute inset-3 rounded-full bg-violet-400/15 blur-xl" />
+              <Image
+                src="/withdrawal-banner.png"
+                alt=""
+                fill
+                sizes="160px"
+                priority
+                className="object-contain object-center scale-110 mix-blend-screen opacity-95 drop-shadow-[0_8px_20px_rgba(139,92,246,0.35)]"
+              />
             </div>
           </div>
 
-          {/* Right: actions */}
           <div className="flex flex-wrap items-center gap-2.5 lg:justify-end">
             <button
               type="button"

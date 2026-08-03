@@ -24,8 +24,9 @@ export default function ThemeToggle() {
         h-10 w-10 rounded-full
         flex items-center justify-center
         text-slate-500 dark:text-slate-300
-        bg-slate-50 dark:bg-slate-800
-        hover:bg-slate-100 dark:hover:bg-slate-700
+        bg-slate-50 dark:bg-[#161827]
+        border border-transparent dark:border-white/5
+        hover:bg-slate-100 dark:hover:bg-white/5
         transition cursor-pointer
       "
     >

@@ -81,7 +81,7 @@ export default function StatCard({
     typeof value === "number" ? value.toLocaleString() : value;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#15192b] px-5 pt-5 pb-4 min-h-[148px] shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-slate-100/80 dark:border-white/5">
+    <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[#161827] px-5 pt-5 pb-4 min-h-[148px] shadow-[0_8px_30px_rgba(15,23,42,0.06)] border border-slate-100/80 dark:border-white/5">
       <div className="relative z-10 flex items-start gap-3">
         <div
           className={`h-12 w-12 shrink-0 rounded-2xl ${theme.iconWrap} flex items-center justify-center`}

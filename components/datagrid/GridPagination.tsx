@@ -57,8 +57,8 @@ export default function GridPagination({
             onClick={() => onPageChange(item)}
             className={`w-10 h-10 rounded-xl text-sm font-semibold transition cursor-pointer ${
               page === item
-                ? "bg-indigo-500 text-white shadow-sm shadow-indigo-200"
-                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                ? "bg-violet-600 text-white shadow-sm shadow-violet-500/40"
+                : "bg-white dark:bg-[#161827] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/5"
             }`}
           >
             {item}

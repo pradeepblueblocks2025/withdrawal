@@ -13,7 +13,7 @@ export default function DashboardLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f4f5f9] dark:bg-slate-950">
+    <div className="min-h-screen bg-[#f4f5f9] dark:bg-[#0b0c14]">
       <Sidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}

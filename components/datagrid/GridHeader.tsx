@@ -33,7 +33,7 @@ export default function GridHeader<T>({
         hidden lg:grid gap-4
         sticky top-0 z-20
         bg-[#f7f8fb]
-        dark:bg-[#121626]
+        dark:bg-[#12141f]
         border-b border-slate-100 dark:border-white/5
         rounded-t-2xl
         px-6
@@ -42,7 +42,7 @@ export default function GridHeader<T>({
         text-[13px]
         font-semibold
         text-slate-500
-        dark:text-slate-300
+        dark:text-slate-400
       "
       style={{
         gridTemplateColumns: columns.map((c) => c.width || "1fr").join(" "),

@@ -12,6 +12,7 @@ import {
   Sparkles,
   Cpu,
 } from "lucide-react";
+import { logout } from "@/lib/auth";
 
 const menus = [
   {
@@ -147,7 +148,11 @@ export default function Sidebar({
         </nav>
 
         <div className="absolute bottom-5 left-0 w-full px-4">
-          <button className="flex items-center gap-4 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 px-4 py-3 rounded-xl w-full hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button
+            type="button"
+            onClick={logout}
+            className="flex items-center gap-4 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 px-4 py-3 rounded-xl w-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          >
             <LogOut />
             {!collapsed && "Logout"}
           </button>

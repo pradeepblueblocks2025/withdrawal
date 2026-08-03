@@ -36,7 +36,7 @@ export const getWithdrawals = async (
 export const bulkApproveWithdrawals = async (
   ids: string[]
 ): Promise<{ status: boolean; message?: string }> => {
-  const response = await api.post("/admin/api/v2/bulkapprovewithdrawals", {
+  const response = await api.post("/admin/api/v2/batch-withdrawals/approve-all", {
     ids,
   });
 

@@ -13,7 +13,7 @@ export default function WithdrawalsLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
+    <div className="min-h-screen bg-[#f4f5f9] dark:bg-slate-950">
       <Sidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
@@ -28,7 +28,7 @@ export default function WithdrawalsLayout({
       >
         <Header mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-        <main className="p-6 min-h-screen">{children}</main>
+        <main className="p-5 lg:p-8 min-h-[calc(100vh-72px)]">{children}</main>
       </div>
     </div>
   );

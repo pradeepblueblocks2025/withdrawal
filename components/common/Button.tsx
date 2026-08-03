@@ -24,19 +24,19 @@ export default function Button({
 }: Props) {
   const styles = {
     primary:
-      "bg-blue-600 hover:bg-blue-700 text-white",
+      "brand-gradient text-white shadow-sm shadow-indigo-200/60 hover:opacity-95",
 
     success:
-      "bg-green-600 hover:bg-green-700 text-white",
+      "bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-200/50",
 
     danger:
-      "bg-red-600 hover:bg-red-700 text-white",
+      "bg-red-500 hover:bg-red-600 text-white",
 
     secondary:
-      "bg-slate-700 hover:bg-slate-600 text-white",
+      "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm",
 
     outline:
-      "border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700",
+      "border border-slate-200 dark:border-slate-600 bg-white dark:bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800",
   };
 
   return (
@@ -44,7 +44,7 @@ export default function Button({
       {...props}
       disabled={loading || props.disabled}
       className={clsx(
-        "h-10 px-4 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
+        "h-11 px-5 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer",
         styles[variant],
         className
       )}

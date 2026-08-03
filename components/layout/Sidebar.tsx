@@ -11,6 +11,7 @@ import {
   CircleDot,
   Sparkles,
   Cpu,
+  Hexagon,
 } from "lucide-react";
 import { logout } from "@/lib/auth";
 
@@ -44,14 +45,9 @@ const menus = [
 
 interface SidebarProps {
   collapsed: boolean;
-  setCollapsed: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
-
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
   mobileOpen: boolean;
-  setMobileOpen: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
+  setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function Sidebar({
@@ -68,58 +64,48 @@ export default function Sidebar({
         onClick={() => setMobileOpen(false)}
         className={`
           fixed inset-0
-          bg-black/50
+          bg-black/40
           z-40
           transition-opacity
           lg:hidden
-          ${
-            mobileOpen
-              ? "opacity-100 visible"
-              : "opacity-0 invisible"
-          }
+          ${mobileOpen ? "opacity-100 visible" : "opacity-0 invisible"}
         `}
       />
 
       <aside
         className={`
-          fixed
-          top-0
-          left-0
-          h-screen
-          bg-white
-          dark:bg-slate-900
-          border-r
-          border-slate-200
-          dark:border-slate-800
-          z-50
-          transition-all
-          duration-300
-          lg:translate-x-0
-          ${
-            mobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }
+          fixed top-0 left-0 h-screen
+          bg-white dark:bg-slate-900
+          border-r border-slate-100 dark:border-slate-800
+          z-50 transition-all duration-300 lg:translate-x-0
+          flex flex-col
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           ${collapsed ? "lg:w-20" : "lg:w-64"}
           w-64
         `}
       >
-        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200 dark:border-slate-800">
+        <div className="h-[72px] flex items-center justify-between px-5">
           {!collapsed && (
-            <h1 className="text-slate-900 dark:text-white font-bold text-xl">
-              FortuneNFT
-            </h1>
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl brand-gradient flex items-center justify-center text-white shadow-sm">
+                <Hexagon size={18} />
+              </div>
+              <h1 className="text-slate-900 dark:text-white font-bold text-lg tracking-tight">
+                FortuneNFT
+              </h1>
+            </div>
           )}
 
           <button
+            type="button"
             onClick={() => setCollapsed(!collapsed)}
-            className="text-slate-600 dark:text-white hover:text-slate-900 dark:hover:text-slate-200"
+            className="h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center cursor-pointer"
           >
-            {collapsed ? <ChevronRight /> : <ChevronLeft />}
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="px-3 space-y-1.5 flex-1 overflow-y-auto">
           {menus.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -133,27 +119,44 @@ export default function Sidebar({
                 onClick={() => setMobileOpen(false)}
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition
+                className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition
                   ${
                     isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "brand-gradient text-white shadow-md shadow-indigo-200/50"
+                      : "text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                   }`}
               >
-                <Icon size={20} />
+                <Icon size={18} />
                 {!collapsed && item.name}
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-5 left-0 w-full px-4">
+        <div className="px-3 pb-5 space-y-3">
+          {!collapsed && (
+            <div className="rounded-2xl banner-gradient p-4">
+              <p className="text-sm font-semibold text-slate-800 dark:text-white">
+                Need Help?
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-300 mt-1 leading-relaxed">
+                Contact support for withdrawal or wallet issues.
+              </p>
+              <button
+                type="button"
+                className="mt-3 h-9 w-full rounded-xl brand-gradient text-white text-xs font-semibold shadow-sm cursor-pointer"
+              >
+                Contact Support
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={logout}
-            className="flex items-center gap-4 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 px-4 py-3 rounded-xl w-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+            className="flex items-center gap-3 text-rose-500 hover:text-rose-600 px-3.5 py-3 rounded-xl w-full hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer text-sm font-medium"
           >
-            <LogOut />
+            <LogOut size={18} />
             {!collapsed && "Logout"}
           </button>
         </div>

@@ -1,108 +1,61 @@
 "use client";
 
-import {
-  Bell,
-  Search,
-  UserCircle2,
-  Menu,
-} from "lucide-react";
+import { Bell, Search, Menu } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 interface HeaderProps {
   mobileOpen: boolean;
-  setMobileOpen: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
+  setMobileOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function Header({
-  setMobileOpen,
-}: HeaderProps) {
+export default function Header({ setMobileOpen }: HeaderProps) {
   return (
-    <header
-      className="
-        sticky
-        top-0
-        z-40
-        h-16
-        bg-white
-        dark:bg-slate-950
-        border-b
-        border-slate-200
-        dark:border-slate-800
-        px-6
-        flex
-        items-center
-        justify-between
-      "
-    >
-      <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-40 h-[72px] bg-white/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-100 dark:border-slate-800 px-6 lg:px-8 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3 min-w-0">
         <button
+          type="button"
           onClick={() => setMobileOpen(true)}
-          className="
-            lg:hidden h-10 w-10 rounded-lg
-            text-slate-700 dark:text-slate-200
-            hover:bg-slate-100 dark:hover:bg-slate-800
-            flex items-center justify-center
-          "
+          className="lg:hidden h-10 w-10 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center cursor-pointer"
         >
           <Menu size={22} />
         </button>
 
-        <h2 className="font-semibold text-xl text-slate-900 dark:text-white">
+        <h2 className="font-semibold text-xl text-slate-900 dark:text-white tracking-tight">
           Dashboard
         </h2>
       </div>
 
-      <div
-        className="
-          hidden md:flex items-center
-          bg-slate-100 dark:bg-slate-800
-          rounded-xl px-4 py-2 w-80
-        "
-      >
-        <Search
-          size={18}
-          className="text-slate-500"
-        />
-
+      <div className="hidden md:flex items-center bg-slate-50 dark:bg-slate-800/80 rounded-full px-4 py-2.5 w-full max-w-md border border-slate-100 dark:border-slate-700">
+        <Search size={18} className="text-slate-400 shrink-0" />
         <input
-          placeholder="Search..."
-          className="
-            bg-transparent outline-none ml-3 w-full
-            text-slate-900 dark:text-slate-100
-            placeholder:text-slate-400
-          "
+          placeholder="Search here..."
+          className="bg-transparent outline-none ml-3 w-full text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
         />
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-5">
+      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
         <ThemeToggle />
 
         <button
-          className="
-            relative
-            text-slate-600 dark:text-slate-300
-            hover:text-slate-900 dark:hover:text-white
-          "
+          type="button"
+          className="relative h-10 w-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
         >
-          <Bell />
-          <span className="absolute -top-1 -right-1 bg-red-500 h-2 w-2 rounded-full" />
+          <Bell size={18} />
+          <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">
+            3
+          </span>
         </button>
 
-        <div className="flex items-center gap-2">
-          <UserCircle2
-            size={36}
-            className="text-slate-600 dark:text-slate-300"
-          />
+        <div className="flex items-center gap-2.5 pl-1">
+          <div className="h-10 w-10 rounded-full brand-gradient text-white text-sm font-bold flex items-center justify-center shadow-sm">
+            AD
+          </div>
 
           <div className="hidden md:block">
-            <p className="font-semibold text-slate-900 dark:text-white">
+            <p className="font-semibold text-sm text-slate-900 dark:text-white leading-tight">
               Administrator
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Super Admin
-            </p>
+            <p className="text-xs text-slate-400 leading-tight">Super Admin</p>
           </div>
         </div>
       </div>

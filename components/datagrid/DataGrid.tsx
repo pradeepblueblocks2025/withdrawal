@@ -8,17 +8,12 @@ import GridRow from "./GridRow";
 interface Props<T> {
   columns: GridColumn<T>[];
   data: T[];
-
   loading?: boolean;
-
   sortKey?: string;
   sortOrder?: "asc" | "desc";
   onSort?: (key: string) => void;
-
   renderMobile?: (row: T) => ReactNode;
-
   onRowClick?: (row: T) => void;
-
   emptyMessage?: string;
 }
 
@@ -33,48 +28,28 @@ export default function DataGrid<T>({
   onRowClick,
   emptyMessage = "No Records Found",
 }: Props<T>) {
-
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-
+      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <GridHeader
           columns={columns}
           sortKey={sortKey}
           sortOrder={sortOrder}
           onSort={onSort}
         />
-
-        <div className="p-8 text-center">
-          Loading...
-        </div>
-
+        <div className="p-10 text-center text-sm text-slate-500">Loading...</div>
       </div>
     );
   }
 
   if (data.length === 0) {
     return (
-      <EmptyState
-        title="Nothing Found"
-        description={emptyMessage}
-      />
+      <EmptyState title="Nothing Found" description={emptyMessage} />
     );
   }
 
   return (
-    <div
-      className="
-      rounded-2xl
-      overflow-x-auto
-      border
-      border-slate-200
-      dark:border-slate-700
-      bg-white
-      dark:bg-slate-900
-      "
-    >
-
+    <div className="rounded-2xl overflow-x-auto border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
       <GridHeader
         columns={columns}
         sortKey={sortKey}
@@ -83,7 +58,6 @@ export default function DataGrid<T>({
       />
 
       {data.map((row, index) => (
-
         <GridRow
           key={index}
           row={row}
@@ -91,9 +65,7 @@ export default function DataGrid<T>({
           renderMobile={renderMobile}
           onClick={onRowClick}
         />
-
       ))}
-
     </div>
   );
 }

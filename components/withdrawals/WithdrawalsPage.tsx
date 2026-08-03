@@ -34,6 +34,28 @@ function shortenAddress(address: string): string {
   return `${address.slice(0, 3)}...${address.slice(-4)}`;
 }
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
+
+const AVATAR_COLORS = [
+  "bg-violet-100 text-violet-600",
+  "bg-sky-100 text-sky-600",
+  "bg-rose-100 text-rose-600",
+  "bg-amber-100 text-amber-600",
+  "bg-emerald-100 text-emerald-600",
+  "bg-indigo-100 text-indigo-600",
+];
+
+function avatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
 interface WithdrawalsPageProps {
   website: string;
   title?: string;
@@ -338,20 +360,32 @@ export default function WithdrawalsPage({
     {
       key: "customer",
       title: "Customer",
-      width: "minmax(140px, 1.2fr)",
+      width: "minmax(180px, 1.4fr)",
+      truncate: false,
       render: (row) => (
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           <input
             type="checkbox"
             checked={selectedIds.includes(row._id)}
             onChange={() => toggleSelect(row)}
-            className="h-4 w-4 shrink-0 rounded border-slate-300"
+            className="h-4 w-4 shrink-0 rounded border-slate-300 accent-indigo-500"
           />
+          <div
+            className={`h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${avatarColor(row.name)}`}
+          >
+            {getInitials(row.name)}
+          </div>
           <div className="min-w-0">
-            <div className="text-xs font-medium truncate" title={row.name}>
+            <div
+              className="text-sm font-semibold text-slate-900 dark:text-white truncate"
+              title={row.name}
+            >
               {row.name}
             </div>
-            <div className="text-xs text-slate-500 truncate" title={row.email}>
+            <div
+              className="text-xs text-slate-400 truncate"
+              title={row.email}
+            >
               {row.email}
             </div>
           </div>
@@ -361,20 +395,22 @@ export default function WithdrawalsPage({
     {
       key: "amount",
       title: "Amount",
-      width: "85px",
-      align: "center",
+      width: "110px",
       truncate: false,
       render: (row) => (
         <div className="relative inline-flex">
           <span
-            className="text-xs font-medium text-green-500 cursor-pointer"
+            className="text-sm font-bold text-emerald-500 cursor-pointer"
             title="Click to copy"
             onClick={(e) => {
               e.stopPropagation();
               copyToClipboard(row._id, "amount", row.amount.toString());
             }}
           >
-            {Number(row.amount).toFixed(2)}
+            {Number(row.amount).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           </span>
           {copiedField?.id === row._id && copiedField.field === "amount" && (
             <CopiedTooltip />
@@ -385,7 +421,7 @@ export default function WithdrawalsPage({
     {
       key: "wallet",
       title: "Wallet",
-      width: "85px",
+      width: "110px",
       render: (row) => {
         let variant:
           | "success"
@@ -417,12 +453,12 @@ export default function WithdrawalsPage({
     {
       key: "address",
       title: "Wallet Address",
-      width: "minmax(110px, 1fr)",
+      width: "minmax(120px, 1fr)",
       truncate: false,
       render: (row) => (
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-xs text-slate-500 font-mono shrink-0"
+            className="text-sm text-slate-500 font-mono shrink-0"
             title={row.walletAddress}
           >
             {shortenAddress(row.walletAddress)}
@@ -435,7 +471,7 @@ export default function WithdrawalsPage({
                 e.stopPropagation();
                 copyToClipboard(row._id, "address", row.walletAddress);
               }}
-              className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-slate-700 transition cursor-pointer"
             >
               <Copy size={14} />
             </button>
@@ -449,7 +485,7 @@ export default function WithdrawalsPage({
     {
       key: "status",
       title: "Status",
-      width: "85px",
+      width: "100px",
       render: (row) => (
         <Badge
           variant={
@@ -467,7 +503,7 @@ export default function WithdrawalsPage({
     {
       key: "token",
       title: "Token",
-      width: "70px",
+      width: "80px",
       align: "center",
       render: (row) => {
         const token = (row.token || "").toLowerCase();
@@ -492,15 +528,15 @@ export default function WithdrawalsPage({
     {
       key: "date",
       title: "Date",
-      width: "115px",
+      width: "120px",
       render: (row) => {
         const { date, time } = formatToIST(row.createdAt);
         return (
           <div className="min-w-0" title={`${date} ${time}`}>
-            <div className="text-xs text-slate-600 dark:text-slate-300 truncate">
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
               {date}
             </div>
-            <div className="text-xs text-slate-500 truncate">{time}</div>
+            <div className="text-xs text-slate-400 truncate">{time}</div>
           </div>
         );
       },
@@ -508,27 +544,28 @@ export default function WithdrawalsPage({
     {
       key: "actions",
       title: "Actions",
-      width: "130px",
+      width: "140px",
       truncate: false,
       render: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => {
               setSelectedWithdrawal(row);
               setShowModal(true);
             }}
-            className="w-8 h-8 rounded-lg bg-blue-500/10 hover:bg-blue-500 text-blue-500 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
+            className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-indigo-500 text-slate-500 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
           >
             <Eye size={16} />
           </button>
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <ToggleSwitch
               checked={row.status === "approved"}
               onChange={(checked) => {
                 console.log("Approve:", row._id, checked);
               }}
             />
-            <span className="text-xs text-slate-500 hidden xl:inline">
+            <span className="text-xs font-medium text-slate-400 hidden xl:inline">
               Approve
             </span>
           </div>
@@ -538,7 +575,7 @@ export default function WithdrawalsPage({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <GridToolbar
         title={title}
         totalRecords={totalRecords}
@@ -623,7 +660,7 @@ export default function WithdrawalsPage({
       </GridToolbar>
 
       <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 cursor-pointer">
+        <label className="flex items-center gap-2.5 cursor-pointer">
           <input
             type="checkbox"
             checked={
@@ -631,9 +668,9 @@ export default function WithdrawalsPage({
               withdrawals.every((item) => selectedIds.includes(item._id))
             }
             onChange={toggleSelectAll}
-            className="h-4 w-4 rounded border-slate-300"
+            className="h-4 w-4 rounded border-slate-300 accent-indigo-500"
           />
-          <span className="text-sm text-slate-600 dark:text-slate-300">
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
             Select All
           </span>
         </label>
@@ -658,7 +695,7 @@ export default function WithdrawalsPage({
               <span className="font-semibold text-slate-700 dark:text-slate-200">
                 {tokenName}
               </span>
-              <span className="font-medium text-green-600 dark:text-green-400">
+              <span className="font-semibold text-emerald-500">
                 {total.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,

@@ -21,11 +21,12 @@ export default function ThemeToggle() {
           : "Switch to dark mode"
       }
       className="
-        h-10 w-10 rounded-xl
+        h-10 w-10 rounded-full
         flex items-center justify-center
-        text-slate-600 dark:text-slate-300
-        hover:bg-slate-100 dark:hover:bg-slate-800
-        transition
+        text-slate-500 dark:text-slate-300
+        bg-slate-50 dark:bg-slate-800
+        hover:bg-slate-100 dark:hover:bg-slate-700
+        transition cursor-pointer
       "
     >
       {!mounted ? (

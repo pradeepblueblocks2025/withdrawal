@@ -31,18 +31,19 @@ export default function SearchBox({
           h-11
           rounded-xl
           border
-          border-slate-300
+          border-slate-200
           dark:border-slate-700
-          bg-white
+          bg-slate-50
           dark:bg-slate-800
           pl-11
           pr-10
           text-sm
           outline-none
           transition-all
-          focus:border-blue-500
+          focus:border-indigo-400
           focus:ring-2
-          focus:ring-blue-500/20
+          focus:ring-indigo-500/15
+          focus:bg-white
         "
       />
 

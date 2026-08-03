@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpDown } from "lucide-react";
+import clsx from "clsx";
 import { ReactNode } from "react";
 
 export interface GridColumn<T> {
@@ -29,7 +30,7 @@ export default function GridHeader<T>({
   return (
     <div
       className="
-        hidden lg:grid
+        hidden lg:grid gap-4
         sticky top-0 z-20
         bg-[#f7f8fb]
         dark:bg-slate-900
@@ -37,6 +38,7 @@ export default function GridHeader<T>({
         rounded-t-2xl
         px-6
         py-4
+        items-center
         text-[13px]
         font-semibold
         text-slate-500
@@ -46,33 +48,46 @@ export default function GridHeader<T>({
       }}
     >
       {columns.map((column) => (
-        <button
+        <div
           key={String(column.key)}
-          type="button"
-          disabled={!column.sortable}
-          onClick={() => column.sortable && onSort?.(String(column.key))}
-          className={`
-            flex items-center gap-2
-            ${column.align === "center" ? "justify-center" : ""}
-            ${column.align === "right" ? "justify-end" : ""}
-            ${!column.sortable ? "cursor-default" : "hover:text-indigo-600 cursor-pointer"}
-          `}
+          className={clsx(
+            "min-w-0",
+            column.align === "center" && "text-center",
+            column.align === "right" && "text-right"
+          )}
         >
-          {column.title}
+          <button
+            type="button"
+            disabled={!column.sortable}
+            onClick={() => column.sortable && onSort?.(String(column.key))}
+            className={clsx(
+              "inline-flex items-center gap-1.5 max-w-full",
+              column.align === "center" && "justify-center",
+              column.align === "right" && "justify-end",
+              !column.sortable
+                ? "cursor-default"
+                : "hover:text-indigo-600 cursor-pointer"
+            )}
+          >
+            <span className="truncate">{column.title}</span>
 
-          {column.sortable && (
-            <ArrowUpDown
-              size={14}
-              className={sortKey === column.key ? "text-indigo-500" : ""}
-            />
-          )}
+            {column.sortable && (
+              <ArrowUpDown
+                size={14}
+                className={clsx(
+                  "shrink-0",
+                  sortKey === column.key && "text-indigo-500"
+                )}
+              />
+            )}
 
-          {sortKey === column.key && (
-            <span className="text-indigo-500 text-[10px]">
-              {sortOrder === "asc" ? "↑" : "↓"}
-            </span>
-          )}
-        </button>
+            {sortKey === column.key && (
+              <span className="text-indigo-500 text-[10px] shrink-0">
+                {sortOrder === "asc" ? "↑" : "↓"}
+              </span>
+            )}
+          </button>
+        </div>
       ))}
     </div>
   );

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import Button from "@/components/common/Button";
 import SearchBox from "@/components/common/SearchBox";
 import {
   ChevronDown,
@@ -55,78 +54,75 @@ export default function GridToolbar({
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-2xl border border-violet-100/80 bg-gradient-to-r from-[#efe9ff] via-[#f7f4ff] to-white px-6 py-6 shadow-[0_8px_30px_rgba(99,102,241,0.08)] dark:border-violet-500/20 dark:from-[#2e1065] dark:via-[#312e81] dark:to-slate-900">
-        <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="rounded-2xl bg-gradient-to-r from-[#ebe4ff] via-[#f3eeff] to-[#f8f7fc] px-6 py-5 shadow-sm dark:from-[#2a1f5e] dark:via-[#2d2668] dark:to-[#1e293b]">
+        <div className="grid grid-cols-1 items-center gap-4 lg:grid-cols-[minmax(0,1fr)_140px_auto]">
+          {/* Left: title */}
           <div className="min-w-0">
             {title && (
-              <h2 className="text-[26px] font-bold leading-tight tracking-tight text-slate-900 dark:text-white">
+              <h2 className="truncate text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {title}
               </h2>
             )}
-
             {typeof totalRecords === "number" && (
-              <p className="mt-2 text-sm font-medium text-violet-500 dark:text-violet-300">
-                Total Records: {totalRecords}
+              <p className="mt-1 text-sm font-medium text-violet-500 dark:text-violet-300">
+                Total Records: {totalRecords.toLocaleString()}
               </p>
             )}
           </div>
 
-          <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-end gap-1 opacity-90 md:flex lg:static lg:translate-x-0 lg:translate-y-0 lg:opacity-100">
-            <div className="relative flex h-20 w-28 items-end justify-center">
-              <div className="absolute bottom-2 left-1 h-10 w-10 rounded-xl bg-amber-300/90 shadow-md" />
-              <div className="absolute bottom-4 left-5 h-8 w-8 rounded-full bg-amber-400 shadow" />
-              <div className="relative z-10 flex h-14 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-lg shadow-violet-300/50">
-                <Wallet size={26} />
-              </div>
-              <div className="absolute -right-1 bottom-6 flex h-9 w-8 items-center justify-center rounded-lg bg-white text-violet-500 shadow-md">
-                <FileText size={16} />
-              </div>
-              <Coins
-                size={18}
-                className="absolute -left-1 top-1 text-amber-400 drop-shadow"
-              />
+          {/* Center: simple graphic */}
+          <div className="hidden items-center justify-center lg:flex" aria-hidden>
+            <div className="relative h-14 w-24">
+              <span className="absolute left-0 top-3 flex h-8 w-8 items-center justify-center rounded-lg bg-amber-300 text-amber-700 shadow-sm">
+                <Coins size={16} />
+              </span>
+              <span className="absolute left-7 top-0 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-md">
+                <Wallet size={22} />
+              </span>
+              <span className="absolute right-0 top-4 flex h-8 w-7 items-center justify-center rounded-md bg-white text-violet-500 shadow-sm dark:bg-slate-100">
+                <FileText size={14} />
+              </span>
             </div>
           </div>
 
-          <div className="relative z-10 flex flex-wrap items-center gap-3 lg:justify-end">
-            <Button
-              variant="secondary"
-              className="!h-11 !rounded-full !bg-white !px-5 shadow-sm"
+          {/* Right: actions */}
+          <div className="flex flex-wrap items-center gap-2.5 lg:justify-end">
+            <button
+              type="button"
               onClick={() => setShowFilters((prev) => !prev)}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-white dark:text-slate-700"
             >
-              <Search size={18} />
+              <Search size={16} className="text-slate-400" />
               {showFilters ? "Hide Search" : "Show Search"}
-              {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              {!showFilters && hasActiveFilters && (
-                <span
-                  className="h-2 w-2 rounded-full bg-indigo-500"
-                  aria-hidden
-                />
+              {showFilters ? (
+                <ChevronUp size={15} className="text-slate-400" />
+              ) : (
+                <ChevronDown size={15} className="text-slate-400" />
               )}
-            </Button>
+              {!showFilters && hasActiveFilters && (
+                <span className="h-2 w-2 rounded-full bg-indigo-500" />
+              )}
+            </button>
 
-            <Button
-              variant="secondary"
-              className="!h-11 !rounded-full !bg-white !px-5 shadow-sm"
+            <button
+              type="button"
               onClick={onRefresh}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-white dark:text-slate-700"
             >
-              <RotateCw size={18} />
+              <RotateCw size={16} className="text-slate-400" />
               Refresh
-            </Button>
+            </button>
 
-            <Button
-              variant="primary"
-              className="!h-11 !rounded-full !px-6"
+            <button
+              type="button"
               onClick={onExport}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
             >
-              <Download size={18} />
+              <Download size={16} />
               Export
-            </Button>
+            </button>
           </div>
         </div>
-
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/50 blur-2xl dark:bg-white/5" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 h-24 w-40 rounded-full bg-violet-200/40 blur-2xl dark:bg-violet-500/10" />
       </div>
 
       {showFilters && (

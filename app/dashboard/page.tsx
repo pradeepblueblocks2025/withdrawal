@@ -38,25 +38,29 @@ function buildStandardCards(stats: WebsiteStats): DashboardCardItem[] {
       title: "Total Withdrawals",
       value: stats.totalWithdrawals,
       icon: Wallet,
-      bg: "bg-blue-600",
+      accent: "purple",
+      subtitle: "All time",
     },
     {
       title: "Pending Withdrawals",
       value: stats.pendingWithdrawals,
       icon: Clock3,
-      bg: "bg-orange-500",
+      accent: "orange",
+      subtitle: "Awaiting action",
     },
     {
       title: "Completed",
       value: stats.completedWithdrawals,
       icon: CircleCheckBig,
-      bg: "bg-green-600",
+      accent: "green",
+      subtitle: "Successfully processed",
     },
     {
       title: "Total Amount",
       value: formatAmount(stats.totalAmount),
       icon: DollarSign,
-      bg: "bg-cyan-600",
+      accent: "blue",
+      subtitle: "All wallets",
     },
   ];
 }
@@ -67,31 +71,36 @@ function buildExoraCards(stats: WebsiteStats): DashboardCardItem[] {
       title: "Total Withdrawals",
       value: stats.totalWithdrawals,
       icon: Wallet,
-      bg: "bg-blue-600",
+      accent: "purple",
+      subtitle: "All time",
     },
     {
       title: "Pending Withdrawals",
       value: stats.pendingWithdrawals,
       icon: Clock3,
-      bg: "bg-orange-500",
+      accent: "orange",
+      subtitle: "Awaiting action",
     },
     {
       title: "Completed",
       value: stats.completedWithdrawals,
       icon: CircleCheckBig,
-      bg: "bg-green-600",
+      accent: "green",
+      subtitle: "Successfully processed",
     },
     {
       title: "Total MTHT",
       value: formatAmount(stats.totalMtht),
       icon: Coins,
-      bg: "bg-amber-500",
+      accent: "amber",
+      subtitle: "All wallets",
     },
     {
       title: "Total USDT",
       value: formatAmount(stats.totalUsdt),
       icon: DollarSign,
-      bg: "bg-emerald-600",
+      accent: "teal",
+      subtitle: "All wallets",
     },
   ];
 }
@@ -119,40 +128,26 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-white">
-          Dashboard
-        </h1>
-
-        <p className="text-slate-500 dark:text-slate-400 mt-2">
-          Welcome back, Administrator
-        </p>
-      </div>
-
+    <div className="space-y-7">
       {loading ? (
-        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-          Loading dashboard stats…
-        </p>
+        <p className="text-sm text-slate-400">Loading dashboard stats…</p>
       ) : null}
 
-      <div className="space-y-8">
-        {WEBSITES.map((site) => {
-          const stats = statsByWebsite[site.key];
-          const cards = site.isExora
-            ? buildExoraCards(stats)
-            : buildStandardCards(stats);
+      {WEBSITES.map((site) => {
+        const stats = statsByWebsite[site.key];
+        const cards = site.isExora
+          ? buildExoraCards(stats)
+          : buildStandardCards(stats);
 
-          return (
-            <DashboardSection
-              key={site.key}
-              title={site.title}
-              cards={cards}
-              columns={site.isExora ? 5 : 4}
-            />
-          );
-        })}
-      </div>
+        return (
+          <DashboardSection
+            key={site.key}
+            title={site.title}
+            cards={cards}
+            columns={site.isExora ? 5 : 4}
+          />
+        );
+      })}
     </div>
   );
 }

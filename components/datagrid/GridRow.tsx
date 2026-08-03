@@ -38,6 +38,7 @@ export default function GridRow<T>({
           <div
             key={String(column.key)}
             className={clsx(
+              "min-w-0",
               column.truncate !== false && "truncate",
               column.align === "center" && "text-center",
               column.align === "right" && "text-right"

@@ -1,11 +1,12 @@
 import { LucideIcon } from "lucide-react";
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard, { StatAccent } from "@/components/dashboard/StatCard";
 
 export interface DashboardCardItem {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  bg: string;
+  accent: StatAccent;
+  subtitle?: string;
 }
 
 interface DashboardSectionProps {
@@ -21,12 +22,12 @@ export default function DashboardSection({
 }: DashboardSectionProps) {
   const gridClass =
     columns === 5
-      ? "grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3"
-      : "grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3";
+      ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4";
 
   return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
+    <section className="space-y-4">
+      <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
         {title}
       </h2>
 
@@ -37,7 +38,8 @@ export default function DashboardSection({
             title={card.title}
             value={card.value}
             icon={card.icon}
-            bg={card.bg}
+            accent={card.accent}
+            subtitle={card.subtitle}
           />
         ))}
       </div>

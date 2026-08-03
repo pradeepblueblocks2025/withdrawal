@@ -33,8 +33,8 @@ export default function GridHeader<T>({
         hidden lg:grid gap-4
         sticky top-0 z-20
         bg-[#f7f8fb]
-        dark:bg-slate-900
-        border-b border-slate-100 dark:border-slate-800
+        dark:bg-[#121626]
+        border-b border-slate-100 dark:border-white/5
         rounded-t-2xl
         px-6
         py-4
@@ -42,31 +42,25 @@ export default function GridHeader<T>({
         text-[13px]
         font-semibold
         text-slate-500
+        dark:text-slate-300
       "
       style={{
         gridTemplateColumns: columns.map((c) => c.width || "1fr").join(" "),
       }}
     >
       {columns.map((column) => (
-        <div
-          key={String(column.key)}
-          className={clsx(
-            "min-w-0",
-            column.align === "center" && "text-center",
-            column.align === "right" && "text-right"
-          )}
-        >
+        <div key={String(column.key)} className="min-w-0 w-full">
           <button
             type="button"
             disabled={!column.sortable}
             onClick={() => column.sortable && onSort?.(String(column.key))}
             className={clsx(
-              "inline-flex items-center gap-1.5 max-w-full",
-              column.align === "center" && "justify-center",
-              column.align === "right" && "justify-end",
+              "flex w-full items-center gap-1.5 max-w-full text-left",
+              column.align === "center" && "justify-center text-center",
+              column.align === "right" && "justify-end text-right",
               !column.sortable
                 ? "cursor-default"
-                : "hover:text-indigo-600 cursor-pointer"
+                : "hover:text-indigo-500 dark:hover:text-indigo-300 cursor-pointer"
             )}
           >
             <span className="truncate">{column.title}</span>

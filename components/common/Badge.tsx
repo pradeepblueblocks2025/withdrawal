@@ -23,22 +23,22 @@ export default function Badge({
 }: Props) {
   const variants = {
     success:
-      "bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20",
+      "bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/30",
 
     danger:
-      "bg-rose-50 text-rose-600 border border-rose-100 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/20",
+      "bg-rose-50 text-rose-700 border border-rose-100 dark:bg-red-500/20 dark:text-red-300 dark:border-red-400/30",
 
     warning:
-      "bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/20",
+      "bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/30",
 
     info:
-      "bg-sky-50 text-sky-600 border border-sky-100 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/20",
+      "bg-sky-50 text-sky-700 border border-sky-100 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-400/30",
 
     purple:
-      "bg-violet-50 text-violet-600 border border-violet-100 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/20",
+      "bg-violet-50 text-violet-700 border border-violet-100 dark:bg-violet-500/20 dark:text-violet-300 dark:border-violet-400/30",
 
     secondary:
-      "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-500/20",
+      "bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-500/20 dark:text-slate-200 dark:border-slate-400/30",
   };
 
   const sizes = {

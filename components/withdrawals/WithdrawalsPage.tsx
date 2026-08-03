@@ -383,7 +383,7 @@ export default function WithdrawalsPage({
               {row.name}
             </div>
             <div
-              className="text-xs text-slate-400 truncate"
+              className="text-xs text-slate-500 dark:text-slate-300 truncate"
               title={row.email}
             >
               {row.email}
@@ -458,7 +458,7 @@ export default function WithdrawalsPage({
       render: (row) => (
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-sm text-slate-500 font-mono shrink-0"
+            className="text-sm text-slate-600 dark:text-slate-200 font-mono shrink-0"
             title={row.walletAddress}
           >
             {shortenAddress(row.walletAddress)}
@@ -471,7 +471,7 @@ export default function WithdrawalsPage({
                 e.stopPropagation();
                 copyToClipboard(row._id, "address", row.walletAddress);
               }}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-slate-700 transition cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-500 dark:text-slate-300 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-slate-700 transition cursor-pointer"
             >
               <Copy size={14} />
             </button>
@@ -504,7 +504,6 @@ export default function WithdrawalsPage({
       key: "token",
       title: "Token",
       width: "80px",
-      align: "center",
       render: (row) => {
         const token = (row.token || "").toLowerCase();
 
@@ -533,10 +532,12 @@ export default function WithdrawalsPage({
         const { date, time } = formatToIST(row.createdAt);
         return (
           <div className="min-w-0" title={`${date} ${time}`}>
-            <div className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
+            <div className="text-sm font-semibold text-slate-800 dark:text-white truncate">
               {date}
             </div>
-            <div className="text-xs text-slate-400 truncate">{time}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-300 truncate">
+              {time}
+            </div>
           </div>
         );
       },
@@ -554,7 +555,7 @@ export default function WithdrawalsPage({
               setSelectedWithdrawal(row);
               setShowModal(true);
             }}
-            className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-indigo-500 text-slate-500 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
+            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 text-slate-600 dark:text-slate-100 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
           >
             <Eye size={16} />
           </button>
@@ -565,7 +566,7 @@ export default function WithdrawalsPage({
                 console.log("Approve:", row._id, checked);
               }}
             />
-            <span className="text-xs font-medium text-slate-400 hidden xl:inline">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-300 hidden xl:inline">
               Approve
             </span>
           </div>

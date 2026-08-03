@@ -25,8 +25,8 @@ export default function GridRow<T>({
           hidden lg:grid gap-4
           px-6 py-5
           items-center
-          border-b border-slate-100 dark:border-slate-800
-          hover:bg-slate-50/80 dark:hover:bg-slate-800/40
+          border-b border-slate-100 dark:border-white/5
+          hover:bg-slate-50/80 dark:hover:bg-white/[0.03]
           transition-colors
           last:border-b-0
         "

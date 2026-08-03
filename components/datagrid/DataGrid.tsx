@@ -30,14 +30,16 @@ export default function DataGrid<T>({
 }: Props<T>) {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 dark:border-white/5 bg-white dark:bg-[#15192b] shadow-sm">
         <GridHeader
           columns={columns}
           sortKey={sortKey}
           sortOrder={sortOrder}
           onSort={onSort}
         />
-        <div className="p-10 text-center text-sm text-slate-500">Loading...</div>
+        <div className="p-10 text-center text-sm text-slate-500 dark:text-slate-300">
+          Loading...
+        </div>
       </div>
     );
   }
@@ -49,7 +51,7 @@ export default function DataGrid<T>({
   }
 
   return (
-    <div className="rounded-2xl overflow-x-auto border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+    <div className="rounded-2xl overflow-x-auto border border-slate-100 dark:border-white/5 bg-white dark:bg-[#15192b] shadow-sm">
       <GridHeader
         columns={columns}
         sortKey={sortKey}

@@ -20,10 +20,11 @@ export default function DashboardSection({
   cards,
   columns = 4,
 }: DashboardSectionProps) {
+  // Keep cards wide enough so labels never clip
   const gridClass =
     columns === 5
-      ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4";
+      ? "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+      : "grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4";
 
   return (
     <section className="space-y-4">

@@ -13,6 +13,10 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "FortuneNFT Admin",
   description: "Admin Dashboard",
+  icons: {
+    icon: [{ url: "/logo-f.png", type: "image/png" }],
+    apple: [{ url: "/logo-f.png" }],
+  },
 };
 
 export default function RootLayout({

@@ -12,7 +12,6 @@ import {
   CircleDot,
   Sparkles,
   Cpu,
-  Hexagon,
   ExternalLink,
 } from "lucide-react";
 import { logout } from "@/lib/auth";
@@ -86,22 +85,27 @@ export default function Sidebar({
           w-64
         `}
       >
-        <div className="h-[72px] flex items-center justify-between px-5">
-          {!collapsed && (
-            <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-xl brand-gradient flex items-center justify-center text-white shadow-sm shadow-violet-500/30">
-                <Hexagon size={18} />
-              </div>
-              <h1 className="text-slate-900 dark:text-white font-bold text-lg tracking-tight">
+        <div className="h-[72px] flex items-center justify-between px-4 gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Image
+              src="/logo-f.png"
+              alt="FortuneNFT"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-xl shadow-sm shadow-violet-500/30 object-cover shrink-0"
+              priority
+            />
+            {!collapsed && (
+              <h1 className="text-slate-900 dark:text-white font-bold text-lg tracking-tight truncate">
                 FortuneNFT
               </h1>
-            </div>
-          )}
+            )}
+          </div>
 
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-center cursor-pointer"
+            className="h-8 w-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-center cursor-pointer shrink-0"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>

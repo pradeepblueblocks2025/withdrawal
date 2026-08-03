@@ -72,12 +72,12 @@ export default function LoginPage() {
 
           <div className="text-center relative z-10">
             <Image
-              src="/logo.webp"
-              width={220}
-              height={220}
-              alt="Logo"
+              src="/logo-f.png"
+              width={120}
+              height={120}
+              alt="FortuneNFT"
               priority
-              className="mx-auto mb-8"
+              className="mx-auto mb-8 rounded-3xl shadow-2xl shadow-black/30"
             />
 
             <h1 className="text-5xl font-bold text-white">

@@ -85,14 +85,27 @@ export default function Sidebar({
           w-64
         `}
       >
-        <div className="h-[72px] flex items-center justify-between px-4 gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div
+          className={`
+            flex px-3
+            ${
+              collapsed
+                ? "h-auto min-h-[88px] flex-col items-center justify-center gap-2 py-3"
+                : "h-[72px] items-center justify-between px-4 gap-2"
+            }
+          `}
+        >
+          <div
+            className={`flex items-center min-w-0 ${
+              collapsed ? "justify-center" : "gap-2.5"
+            }`}
+          >
             <Image
               src="/logo-f.png"
               alt="FortuneNFT"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-xl shadow-sm shadow-violet-500/30 object-cover shrink-0"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-xl shadow-sm shadow-violet-500/30 object-cover shrink-0"
               priority
             />
             {!collapsed && (
@@ -106,6 +119,7 @@ export default function Sidebar({
             type="button"
             onClick={() => setCollapsed(!collapsed)}
             className="h-8 w-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-center cursor-pointer shrink-0"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>

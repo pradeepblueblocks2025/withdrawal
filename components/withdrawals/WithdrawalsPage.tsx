@@ -26,8 +26,13 @@ import {
   getWithdrawals,
 } from "@/services/withdrawal.service";
 import { formatToIST } from "@/lib/date";
+import {
+  playNewWithdrawalSound,
+  unlockNotificationSound,
+} from "@/lib/notification-sound";
 
 const SEARCH_DEBOUNCE_MS = 400;
+const POLL_INTERVAL_MS = 120_000;
 
 function shortenAddress(address: string): string {
   if (!address || address.length <= 7) return address;
@@ -109,11 +114,28 @@ export default function WithdrawalsPage({
 
   const hasLoadedOnce = useRef(false);
   const requestIdRef = useRef(0);
+  const knownTotalRef = useRef<number | null>(null);
 
   useEffect(() => {
     setSelectedIds([]);
     setSelectedMeta({});
+    knownTotalRef.current = null;
+    hasLoadedOnce.current = false;
   }, [website]);
+
+  useEffect(() => {
+    const unlock = () => {
+      void unlockNotificationSound();
+    };
+
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -133,15 +155,17 @@ export default function WithdrawalsPage({
       signal: controller.signal,
       requestId,
       silent: hasLoadedOnce.current,
+      checkNew: false,
     });
 
     const intervalId = setInterval(() => {
       loadData({
         silent: true,
+        checkNew: true,
         signal: controller.signal,
         requestId: ++requestIdRef.current,
       });
-    }, 120_000);
+    }, POLL_INTERVAL_MS);
 
     return () => {
       controller.abort();
@@ -266,6 +290,7 @@ export default function WithdrawalsPage({
 
   async function loadData(options?: {
     silent?: boolean;
+    checkNew?: boolean;
     signal?: AbortSignal;
     requestId?: number;
   }) {
@@ -294,9 +319,21 @@ export default function WithdrawalsPage({
         return;
       }
 
+      const nextTotal = response.totalCount ?? response.total ?? 0;
+      const previousTotal = knownTotalRef.current;
+
+      if (
+        options?.checkNew &&
+        previousTotal !== null &&
+        nextTotal > previousTotal
+      ) {
+        void playNewWithdrawalSound();
+      }
+
+      knownTotalRef.current = nextTotal;
       setWithdrawals(response.data ?? []);
       setTotalPages(response.pages ?? response.totalPages ?? 0);
-      setTotalRecords(response.totalCount ?? response.total ?? 0);
+      setTotalRecords(nextTotal);
       hasLoadedOnce.current = true;
     } catch (err) {
       if (

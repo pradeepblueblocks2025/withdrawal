@@ -27,6 +27,7 @@ import {
 } from "@/services/withdrawal.service";
 import { formatToIST } from "@/lib/date";
 import {
+  isNotificationSoundUnlocked,
   playNewWithdrawalSound,
   unlockNotificationSound,
 } from "@/lib/notification-sound";
@@ -124,12 +125,16 @@ export default function WithdrawalsPage({
   }, [website]);
 
   useEffect(() => {
-    const unlock = () => {
-      void unlockNotificationSound();
+    const unlock = async () => {
+      await unlockNotificationSound();
+      if (isNotificationSoundUnlocked()) {
+        window.removeEventListener("pointerdown", unlock);
+        window.removeEventListener("keydown", unlock);
+      }
     };
 
-    window.addEventListener("pointerdown", unlock, { once: true });
-    window.addEventListener("keydown", unlock, { once: true });
+    window.addEventListener("pointerdown", unlock);
+    window.addEventListener("keydown", unlock);
 
     return () => {
       window.removeEventListener("pointerdown", unlock);
@@ -319,19 +324,26 @@ export default function WithdrawalsPage({
         return;
       }
 
-      const nextTotal = response.totalCount ?? response.total ?? 0;
+      const payload = response as typeof response & {
+        totalRecords?: number;
+      };
+      const nextTotal = Number(
+        payload.totalCount ?? payload.total ?? payload.totalRecords ?? 0
+      );
       const previousTotal = knownTotalRef.current;
+      const nextRows = response.data ?? [];
 
-      if (
-        options?.checkNew &&
+      const shouldNotify =
+        Boolean(options?.checkNew) &&
         previousTotal !== null &&
-        nextTotal > previousTotal
-      ) {
-        void playNewWithdrawalSound();
+        nextTotal > previousTotal;
+
+      if (shouldNotify) {
+        await playNewWithdrawalSound();
       }
 
       knownTotalRef.current = nextTotal;
-      setWithdrawals(response.data ?? []);
+      setWithdrawals(nextRows);
       setTotalPages(response.pages ?? response.totalPages ?? 0);
       setTotalRecords(nextTotal);
       hasLoadedOnce.current = true;
@@ -668,7 +680,10 @@ export default function WithdrawalsPage({
             ],
           },
         ]}
-        onRefresh={loadData}
+        onRefresh={async () => {
+          await unlockNotificationSound();
+          await loadData({ checkNew: true });
+        }}
         onExport={() => {}}
       >
         {dateRange === "custom" && (

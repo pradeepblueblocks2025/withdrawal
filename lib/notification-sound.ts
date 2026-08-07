@@ -1,69 +1,57 @@
-let audioCtx: AudioContext | null = null;
+const SOUND_SRC = "/notification.wav";
 
-function getAudioContext(): AudioContext | null {
+let audioEl: HTMLAudioElement | null = null;
+let unlocked = false;
+
+function getAudio(): HTMLAudioElement | null {
   if (typeof window === "undefined") return null;
 
-  const AudioCtx =
-    window.AudioContext ||
-    (window as unknown as { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext;
-
-  if (!AudioCtx) return null;
-
-  if (!audioCtx) {
-    audioCtx = new AudioCtx();
+  if (!audioEl) {
+    audioEl = new Audio(SOUND_SRC);
+    audioEl.preload = "auto";
+    audioEl.volume = 0.85;
   }
 
-  return audioCtx;
+  return audioEl;
 }
 
-/** Call once after a user gesture so browsers allow sound later. */
+/** Must run inside a user gesture (click/key) so browsers allow later playback. */
 export async function unlockNotificationSound(): Promise<void> {
-  const ctx = getAudioContext();
-  if (!ctx) return;
-
-  if (ctx.state === "suspended") {
-    try {
-      await ctx.resume();
-    } catch {
-      // ignore
-    }
-  }
-}
-
-/** Short two-tone chime for new withdrawal alerts. */
-export async function playNewWithdrawalSound(): Promise<void> {
-  const ctx = getAudioContext();
-  if (!ctx) return;
+  const audio = getAudio();
+  if (!audio) return;
 
   try {
-    if (ctx.state === "suspended") {
-      await ctx.resume();
+    audio.muted = true;
+    audio.currentTime = 0;
+    await audio.play();
+    audio.pause();
+    audio.currentTime = 0;
+    audio.muted = false;
+    unlocked = true;
+  } catch {
+    // Still mark unlocked attempt; play may work on next gesture.
+    unlocked = false;
+  }
+}
+
+export async function playNewWithdrawalSound(): Promise<void> {
+  const audio = getAudio();
+  if (!audio) return;
+
+  try {
+    if (!unlocked) {
+      await unlockNotificationSound();
     }
 
-    const now = ctx.currentTime;
-
-    const playTone = (frequency: number, start: number, duration: number) => {
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(frequency, start);
-
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.18, start + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-
-      oscillator.connect(gain);
-      gain.connect(ctx.destination);
-
-      oscillator.start(start);
-      oscillator.stop(start + duration + 0.02);
-    };
-
-    playTone(880, now, 0.16);
-    playTone(1175, now + 0.14, 0.22);
+    audio.pause();
+    audio.currentTime = 0;
+    audio.muted = false;
+    await audio.play();
   } catch (err) {
     console.error("Failed to play notification sound", err);
   }
+}
+
+export function isNotificationSoundUnlocked(): boolean {
+  return unlocked;
 }

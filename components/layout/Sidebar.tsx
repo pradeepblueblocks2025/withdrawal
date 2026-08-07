@@ -80,24 +80,24 @@ export default function Sidebar({
           border-r border-slate-100 dark:border-white/5
           z-50 transition-all duration-300 lg:translate-x-0
           flex flex-col
+          w-64
           ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           ${collapsed ? "lg:w-20" : "lg:w-64"}
-          w-64
         `}
       >
         <div
           className={`
-            flex px-3
+            flex h-[72px] items-center justify-between px-4 gap-2
             ${
               collapsed
-                ? "h-auto min-h-[88px] flex-col items-center justify-center gap-2 py-3"
-                : "h-[72px] items-center justify-between px-4 gap-2"
+                ? "lg:h-auto lg:min-h-[88px] lg:flex-col lg:items-center lg:justify-center lg:gap-2 lg:py-3 lg:px-3"
+                : ""
             }
           `}
         >
           <div
-            className={`flex items-center min-w-0 ${
-              collapsed ? "justify-center" : "gap-2.5"
+            className={`flex items-center min-w-0 gap-2.5 ${
+              collapsed ? "lg:gap-0 lg:justify-center" : ""
             }`}
           >
             <Image
@@ -108,17 +108,19 @@ export default function Sidebar({
               className="h-10 w-10 rounded-xl shadow-sm shadow-violet-500/30 object-cover shrink-0"
               priority
             />
-            {!collapsed && (
-              <h1 className="text-slate-900 dark:text-white font-bold text-lg tracking-tight truncate">
-                FortuneNFT
-              </h1>
-            )}
+            <h1
+              className={`text-slate-900 dark:text-white font-bold text-lg tracking-tight truncate ${
+                collapsed ? "lg:hidden" : ""
+              }`}
+            >
+              FortuneNFT
+            </h1>
           </div>
 
           <button
             type="button"
-            onClick={() => setCollapsed(!collapsed)}
-            className="h-8 w-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-center cursor-pointer shrink-0"
+            onClick={() => setCollapsed((prev) => !prev)}
+            className="hidden lg:flex h-8 w-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 items-center justify-center cursor-pointer shrink-0"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -140,56 +142,63 @@ export default function Sidebar({
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition
+                  ${collapsed ? "lg:justify-center lg:px-0" : ""}
                   ${
                     isActive
                       ? "brand-gradient text-white shadow-md shadow-violet-500/30"
                       : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   }`}
+                title={item.name}
               >
-                <Icon size={18} />
-                {!collapsed && item.name}
+                <Icon size={18} className="shrink-0" />
+                <span className={collapsed ? "lg:hidden" : ""}>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
         <div className="px-3 pb-5 space-y-3">
-          {!collapsed && (
-            <div className="relative overflow-hidden rounded-2xl banner-gradient p-4 dark:border dark:border-white/5">
-              <div className="relative z-10">
-                <p className="text-sm font-semibold text-slate-800 dark:text-white">
-                  Need Help?
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-300 mt-1 leading-relaxed pr-14">
-                  Contact support for withdrawal or wallet issues.
-                </p>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl brand-gradient px-3 text-white text-xs font-semibold shadow-sm cursor-pointer"
-                >
-                  Contact Support
-                  <ExternalLink size={12} />
-                </button>
-              </div>
-              <div className="pointer-events-none absolute -right-2 bottom-0 h-16 w-16 opacity-90">
-                <Image
-                  src="/withdrawal-banner.png"
-                  alt=""
-                  fill
-                  className="object-contain object-bottom scale-125 dark:mix-blend-screen"
-                  sizes="64px"
-                />
-              </div>
+          <div
+            className={`relative overflow-hidden rounded-2xl banner-gradient p-4 dark:border dark:border-white/5 ${
+              collapsed ? "lg:hidden" : ""
+            }`}
+          >
+            <div className="relative z-10">
+              <p className="text-sm font-semibold text-slate-800 dark:text-white">
+                Need Help?
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-300 mt-1 leading-relaxed pr-14">
+                Contact support for withdrawal or wallet issues.
+              </p>
+              <button
+                type="button"
+                className="mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl brand-gradient px-3 text-white text-xs font-semibold shadow-sm cursor-pointer"
+              >
+                Contact Support
+                <ExternalLink size={12} />
+              </button>
             </div>
-          )}
+            <div className="pointer-events-none absolute -right-2 bottom-0 h-16 w-16 opacity-90">
+              <Image
+                src="/withdrawal-banner.png"
+                alt=""
+                fill
+                className="object-contain object-bottom scale-125 dark:mix-blend-screen"
+                sizes="64px"
+              />
+            </div>
+          </div>
 
           <button
             type="button"
             onClick={logout}
-            className="flex items-center gap-3 text-rose-500 hover:text-rose-400 px-3.5 py-3 rounded-xl w-full hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer text-sm font-medium"
+            className={`flex items-center gap-3 text-rose-500 hover:text-rose-400 px-3.5 py-3 rounded-xl w-full hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer text-sm font-medium ${
+              collapsed ? "lg:justify-center lg:px-0" : ""
+            }`}
+            title="Logout"
           >
-            <LogOut size={18} />
-            {!collapsed && "Logout"}
+            <LogOut size={18} className="shrink-0" />
+            <span className={collapsed ? "lg:hidden" : ""}>Logout</span>
           </button>
         </div>
       </aside>

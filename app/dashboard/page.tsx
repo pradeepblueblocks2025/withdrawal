@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Wallet,
   Clock3,
@@ -17,6 +17,13 @@ import {
   getDashboard,
 } from "@/services/dashboard.service";
 import { WebsiteKey, WebsiteStats } from "@/types/dashboard";
+import {
+  isNotificationSoundUnlocked,
+  notifyNewWithdrawals,
+  unlockNotificationSound,
+} from "@/lib/notification-sound";
+
+const POLL_INTERVAL_MS = 120_000;
 
 const WEBSITES: { key: WebsiteKey; title: string; isExora?: boolean }[] = [
   { key: "fortunenft", title: "Fortune NFT" },
@@ -105,25 +112,88 @@ function buildExoraCards(stats: WebsiteStats): DashboardCardItem[] {
   ];
 }
 
+function getIncreasedSites(
+  previous: Record<WebsiteKey, WebsiteStats> | null,
+  next: Record<WebsiteKey, WebsiteStats>
+): string[] {
+  if (!previous) return [];
+
+  const increased: string[] = [];
+
+  for (const site of WEBSITES) {
+    const prev = previous[site.key];
+    const curr = next[site.key];
+    if (!prev || !curr) continue;
+
+    const hasNew =
+      curr.totalWithdrawals > prev.totalWithdrawals ||
+      curr.pendingWithdrawals > prev.pendingWithdrawals;
+
+    if (hasNew) {
+      increased.push(site.title);
+    }
+  }
+
+  return increased;
+}
+
 export default function DashboardPage() {
   const [statsByWebsite, setStatsByWebsite] = useState<
     Record<WebsiteKey, WebsiteStats>
   >(emptyStatsByWebsite);
   const [loading, setLoading] = useState(true);
+  const previousStatsRef = useRef<Record<WebsiteKey, WebsiteStats> | null>(
+    null
+  );
+
+  useEffect(() => {
+    const unlock = async () => {
+      await unlockNotificationSound();
+      if (isNotificationSoundUnlocked()) {
+        window.removeEventListener("pointerdown", unlock);
+        window.removeEventListener("keydown", unlock);
+      }
+    };
+
+    window.addEventListener("pointerdown", unlock);
+    window.addEventListener("keydown", unlock);
+
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    setLoading(true);
+    const load = async (checkNew: boolean) => {
+      if (!checkNew) setLoading(true);
 
-    getDashboard(controller.signal).then((stats) => {
+      const stats = await getDashboard(controller.signal);
       if (controller.signal.aborted || stats === null) return;
+
+      if (checkNew) {
+        const sites = getIncreasedSites(previousStatsRef.current, stats);
+        if (sites.length > 0) {
+          void notifyNewWithdrawals(sites);
+        }
+      }
+
+      previousStatsRef.current = stats;
       setStatsByWebsite(stats);
       setLoading(false);
-    });
+    };
+
+    void load(false);
+
+    const intervalId = setInterval(() => {
+      void load(true);
+    }, POLL_INTERVAL_MS);
 
     return () => {
       controller.abort();
+      clearInterval(intervalId);
     };
   }, []);
 

@@ -28,9 +28,16 @@ import {
 import { formatToIST } from "@/lib/date";
 import {
   isNotificationSoundUnlocked,
-  playNewWithdrawalSound,
+  notifyNewWithdrawals,
   unlockNotificationSound,
 } from "@/lib/notification-sound";
+
+const WEBSITE_SPEECH_NAMES: Record<string, string> = {
+  fortunenft: "Fortune NFT",
+  fortuneball: "FortuneBall",
+  exora: "Exora",
+  btsmart: "BTSMART",
+};
 
 const SEARCH_DEBOUNCE_MS = 400;
 const POLL_INTERVAL_MS = 120_000;
@@ -62,6 +69,24 @@ function avatarColor(name: string): string {
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
+const DEFAULT_WALLET_OPTIONS = [
+  { label: "Staking", value: "staking" },
+  { label: "Affiliate", value: "affiliate" },
+  { label: "Royalty", value: "royalty" },
+  { label: "Booster", value: "booster" },
+  { label: "Swap", value: "swap" },
+];
+
+const FORTUNEBALL_WALLET_OPTIONS = [
+  { label: "Affiliate", value: "bidaffiliate" },
+  { label: "Reward", value: "bidreward" },
+];
+
+function getWalletFilterOptions(website: string) {
+  if (website === "fortuneball") return FORTUNEBALL_WALLET_OPTIONS;
+  return DEFAULT_WALLET_OPTIONS;
+}
+
 interface WithdrawalsPageProps {
   website: string;
   title?: string;
@@ -71,6 +96,7 @@ export default function WithdrawalsPage({
   website,
   title = "Withdrawal Management",
 }: WithdrawalsPageProps) {
+  const walletFilterOptions = getWalletFilterOptions(website);
   const [loading, setLoading] = useState(true);
 
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
@@ -120,6 +146,7 @@ export default function WithdrawalsPage({
   useEffect(() => {
     setSelectedIds([]);
     setSelectedMeta({});
+    setWalletType("");
     knownTotalRef.current = null;
     hasLoadedOnce.current = false;
   }, [website]);
@@ -339,7 +366,11 @@ export default function WithdrawalsPage({
         nextTotal > previousTotal;
 
       if (shouldNotify) {
-        await playNewWithdrawalSound();
+        const siteName =
+          WEBSITE_SPEECH_NAMES[website] ||
+          title.replace(/\s*Withdrawals?\s*$/i, "").trim() ||
+          website;
+        await notifyNewWithdrawals([siteName]);
       }
 
       knownTotalRef.current = nextTotal;
@@ -484,12 +515,14 @@ export default function WithdrawalsPage({
             variant = "success";
             break;
           case "affiliate":
+          case "bidaffiliate":
             variant = "info";
             break;
           case "royalty":
             variant = "warning";
             break;
           case "booster":
+          case "bidreward":
             variant = "secondary";
             break;
           default:
@@ -646,13 +679,7 @@ export default function WithdrawalsPage({
             label: "Wallet",
             value: walletType,
             onChange: updateFilter(setWalletType),
-            options: [
-              { label: "Staking", value: "staking" },
-              { label: "Affiliate", value: "affiliate" },
-              { label: "Royalty", value: "royalty" },
-              { label: "Booster", value: "booster" },
-              { label: "Swap", value: "swap" },
-            ],
+            options: walletFilterOptions,
           },
           {
             label: "Token",

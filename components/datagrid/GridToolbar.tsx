@@ -121,7 +121,7 @@ export default function GridToolbar({
           >
             <div className="absolute bottom-1 left-1/2 h-3 w-20 -translate-x-1/2 rounded-full bg-slate-300/50 blur-[2px] dark:bg-violet-500/20" />
             <Image
-              src="/withdrawal-banner.png"
+              src="/withdrawal-banner-new.png"
               alt=""
               fill
               sizes="170px"
@@ -130,7 +130,7 @@ export default function GridToolbar({
             />
             <div className="absolute inset-0 hidden dark:block">
               <Image
-                src="/withdrawal-banner.png"
+                src="/withdrawal-banner-new.png"
                 alt=""
                 fill
                 sizes="170px"

@@ -12,7 +12,6 @@ import {
   CircleDot,
   Sparkles,
   Cpu,
-  ExternalLink,
 } from "lucide-react";
 import { logout } from "@/lib/auth";
 
@@ -157,38 +156,7 @@ export default function Sidebar({
           })}
         </nav>
 
-        <div className="px-3 pb-5 space-y-3">
-          <div
-            className={`relative overflow-hidden rounded-2xl banner-gradient p-4 dark:border dark:border-white/5 ${
-              collapsed ? "lg:hidden" : ""
-            }`}
-          >
-            <div className="relative z-10">
-              <p className="text-sm font-semibold text-slate-800 dark:text-white">
-                Need Help?
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-300 mt-1 leading-relaxed pr-14">
-                Contact support for withdrawal or wallet issues.
-              </p>
-              <button
-                type="button"
-                className="mt-3 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl brand-gradient px-3 text-white text-xs font-semibold shadow-sm cursor-pointer"
-              >
-                Contact Support
-                <ExternalLink size={12} />
-              </button>
-            </div>
-            <div className="pointer-events-none absolute -right-2 bottom-0 h-16 w-16 opacity-90">
-              <Image
-                src="/withdrawal-banner.png"
-                alt=""
-                fill
-                className="object-contain object-bottom scale-125 dark:mix-blend-screen"
-                sizes="64px"
-              />
-            </div>
-          </div>
-
+        <div className="px-3 pb-5">
           <button
             type="button"
             onClick={logout}

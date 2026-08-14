@@ -32,18 +32,18 @@ export default function GridPagination({
   }
 
   return (
-    <div className="mt-5 px-1 py-2 flex flex-col lg:flex-row justify-between items-center gap-4">
-      <div className="text-sm text-slate-500">
+    <div className="mt-5 px-1 py-2 flex flex-col xl:flex-row justify-between items-center gap-4">
+      <div className="text-sm text-slate-500 text-center xl:text-left">
         Showing <span className="font-semibold text-slate-700 dark:text-slate-200">{start}</span> -{" "}
         <span className="font-semibold text-slate-700 dark:text-slate-200">{end}</span> of{" "}
         <span className="font-semibold text-slate-700 dark:text-slate-200">{totalRecords}</span>{" "}
         records
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
-          className="!h-10 !w-10 !px-0"
+          className="!h-9 !w-9 !px-0 sm:!h-10 sm:!w-10"
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
         >
@@ -55,7 +55,7 @@ export default function GridPagination({
             key={item}
             type="button"
             onClick={() => onPageChange(item)}
-            className={`w-10 h-10 rounded-xl text-sm font-semibold transition cursor-pointer ${
+            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-sm font-semibold transition cursor-pointer ${
               page === item
                 ? "bg-violet-600 text-white shadow-sm shadow-violet-500/40"
                 : "bg-white dark:bg-[#161827] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-violet-50 hover:text-violet-600 dark:hover:bg-white/5"
@@ -67,7 +67,7 @@ export default function GridPagination({
 
         <Button
           variant="outline"
-          className="!h-10 !w-10 !px-0"
+          className="!h-9 !w-9 !px-0 sm:!h-10 sm:!w-10"
           disabled={page === totalPages || totalPages === 0}
           onClick={() => onPageChange(page + 1)}
         >
@@ -76,11 +76,11 @@ export default function GridPagination({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-500">Rows per page</span>
+        <span className="text-sm text-slate-500">Rows</span>
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange?.(Number(e.target.value))}
-          className="h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-700 dark:text-slate-200"
+          className="h-9 sm:h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-700 dark:text-slate-200"
         >
           <option value={10}>10</option>
           <option value={20}>20</option>

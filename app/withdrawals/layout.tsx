@@ -29,7 +29,7 @@ export default function WithdrawalsLayout({
       >
         <Header mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-        <main className="p-5 lg:p-8 min-h-[calc(100vh-72px)]">{children}</main>
+        <main className="p-3 sm:p-5 lg:p-8 min-h-[calc(100vh-72px)]">{children}</main>
       </div>
     </div>
   );

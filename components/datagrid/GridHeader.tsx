@@ -30,7 +30,7 @@ export default function GridHeader<T>({
   return (
     <div
       className="
-        hidden lg:grid gap-4
+        hidden xl:grid gap-4
         sticky top-0 z-20
         bg-[#f7f8fb]
         dark:bg-[#12141f]

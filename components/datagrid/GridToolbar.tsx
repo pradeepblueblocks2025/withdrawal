@@ -86,25 +86,25 @@ export default function GridToolbar({
 
   return (
     <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-[#f3f4f6] px-5 py-5 shadow-[0_8px_28px_rgba(15,23,42,0.06)] dark:border-white/5 dark:bg-gradient-to-r dark:from-[#1a1530] dark:via-[#161827] dark:to-[#12141f] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:px-6">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-[#f3f4f6] px-4 py-4 shadow-[0_8px_28px_rgba(15,23,42,0.06)] dark:border-white/5 dark:bg-gradient-to-r dark:from-[#1a1530] dark:via-[#161827] dark:to-[#12141f] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:px-6 sm:py-5">
         <WavePattern />
 
-        <div className="relative z-10 grid grid-cols-1 items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+        <div className="relative z-10 grid grid-cols-1 items-center gap-4 xl:grid-cols-[minmax(0,1fr)_auto_auto]">
           {/* Left: icon + title */}
-          <div className="flex min-w-0 items-center gap-3.5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-violet-600 shadow-sm ring-1 ring-slate-200/80 dark:bg-[#252a40] dark:text-violet-300 dark:ring-white/10">
-              <FileDown size={22} strokeWidth={2} />
+          <div className="flex min-w-0 items-center gap-3 sm:gap-3.5">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-white text-violet-600 shadow-sm ring-1 ring-slate-200/80 dark:bg-[#252a40] dark:text-violet-300 dark:ring-white/10">
+              <FileDown size={20} strokeWidth={2} />
             </div>
 
             <div className="min-w-0">
               {title && (
-                <h2 className="truncate text-[22px] font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-[26px]">
+                <h2 className="truncate text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-[22px] xl:text-[26px]">
                   {title}
                 </h2>
               )}
 
               {typeof totalRecords === "number" && (
-                <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+                <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400 sm:mt-1 sm:text-sm">
                   Total Records:{" "}
                   <span className="font-semibold text-violet-600 dark:text-violet-300">
                     {totalRecords.toLocaleString()}
@@ -116,7 +116,7 @@ export default function GridToolbar({
 
           {/* Center: illustration */}
           <div
-            className="pointer-events-none relative mx-auto hidden h-[100px] w-[170px] md:block"
+            className="pointer-events-none relative mx-auto hidden h-[100px] w-[170px] xl:block"
             aria-hidden
           >
             <div className="absolute bottom-1 left-1/2 h-3 w-20 -translate-x-1/2 rounded-full bg-slate-300/50 blur-[2px] dark:bg-violet-500/20" />
@@ -141,11 +141,11 @@ export default function GridToolbar({
           </div>
 
           {/* Right: actions */}
-          <div className="flex flex-wrap items-center gap-2.5 lg:justify-end">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5 xl:justify-end">
             <button
               type="button"
               onClick={() => setShowFilters((prev) => !prev)}
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
+              className="col-span-2 inline-flex h-10 sm:h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 sm:px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
             >
               <Search size={16} className="text-slate-400" />
               {showFilters ? "Hide Search" : "Show Search"}
@@ -162,7 +162,7 @@ export default function GridToolbar({
             <button
               type="button"
               onClick={onRefresh}
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
+              className="inline-flex h-10 sm:h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 sm:px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/15 dark:bg-transparent dark:text-slate-200 dark:hover:bg-white/5"
             >
               <RotateCw size={16} className="text-slate-400" />
               Refresh
@@ -171,7 +171,7 @@ export default function GridToolbar({
             <button
               type="button"
               onClick={onExport}
-              className="inline-flex h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 px-5 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(124,58,237,0.35)] transition hover:opacity-95"
+              className="inline-flex h-10 sm:h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 px-3 sm:px-5 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(124,58,237,0.35)] transition hover:opacity-95"
             >
               <Download size={16} />
               Export

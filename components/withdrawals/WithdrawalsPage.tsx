@@ -90,6 +90,44 @@ function getWalletFilterOptions(website: string) {
   return DEFAULT_WALLET_OPTIONS;
 }
 
+function walletBadgeVariant(
+  walletType: string
+): "success" | "info" | "warning" | "danger" | "secondary" {
+  switch (walletType.toLowerCase()) {
+    case "staking":
+      return "success";
+    case "affiliate":
+    case "bidaffiliate":
+      return "info";
+    case "royalty":
+      return "warning";
+    case "booster":
+    case "bidreward":
+      return "secondary";
+    default:
+      return "danger";
+  }
+}
+
+function statusBadgeVariant(
+  status: string
+): "success" | "warning" | "info" | "danger" {
+  if (status === "approved") return "success";
+  if (status === "pending") return "warning";
+  if (status === "hold") return "info";
+  return "danger";
+}
+
+function tokenBadgeVariant(
+  token: string
+): "success" | "warning" | "danger" | "secondary" {
+  const value = token.toLowerCase();
+  if (value === "mtht") return "success";
+  if (value === "usdt") return "warning";
+  if (value === "btmeta") return "danger";
+  return "secondary";
+}
+
 interface WithdrawalsPageProps {
   website: string;
   title?: string;
@@ -480,6 +518,199 @@ export default function WithdrawalsPage({
     </div>
   );
 
+  const renderRowActions = (row: Withdrawal, compact = false) => {
+    const canChangeStatus =
+      row.status === "pending" || row.status === "hold";
+
+    return (
+      <div className={`flex items-center gap-2 ${compact ? "w-full" : ""}`}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedWithdrawal(row);
+            setShowModal(true);
+          }}
+          className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#252a40] hover:bg-indigo-500 text-slate-600 dark:text-slate-100 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
+          title="View details"
+        >
+          <Eye size={16} />
+        </button>
+
+        {canChangeStatus && (
+          <>
+            {row.status === "pending" && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setRejectReason("");
+                  setStatusAction({ type: "hold", withdrawal: row });
+                }}
+                className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25 sm:flex-none"
+                title="Hold withdrawal"
+              >
+                <PauseCircle size={14} />
+                Hold
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setRejectReason("");
+                setStatusAction({ type: "reject", withdrawal: row });
+              }}
+              className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25 sm:flex-none"
+              title="Reject withdrawal"
+            >
+              <XCircle size={14} />
+              Reject
+            </button>
+          </>
+        )}
+
+        {!canChangeStatus && (
+          <div className="flex items-center gap-2 min-w-0">
+            <ToggleSwitch
+              checked={row.status === "approved"}
+              onChange={(checked) => {
+                console.log("Approve:", row._id, checked);
+              }}
+            />
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-300">
+              Approve
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderMobileCard = (row: Withdrawal) => {
+    const { date, time } = formatToIST(row.createdAt);
+    const tokenValue = (row.token || "").toLowerCase();
+
+    return (
+      <div className="p-4 sm:p-5">
+        {/* Header */}
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            checked={selectedIds.includes(row._id)}
+            onChange={() => toggleSelect(row)}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 accent-indigo-500"
+          />
+
+          <div
+            className={`mt-0.5 h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${avatarColor(row.name)}`}
+          >
+            {getInitials(row.name)}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                  {row.name}
+                </p>
+                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                  {row.email}
+                </p>
+              </div>
+              <Badge variant={statusBadgeVariant(row.status)}>
+                {row.status}
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Amount strip */}
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3.5 py-3 dark:bg-[#1c1f30]">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Amount
+            </p>
+            <button
+              type="button"
+              className="relative mt-0.5 text-lg font-bold tabular-nums text-emerald-500"
+              title="Click to copy"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(row._id, "amount", row.amount.toString());
+              }}
+            >
+              {Number(row.amount).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              {copiedField?.id === row._id && copiedField.field === "amount" && (
+                <CopiedTooltip />
+              )}
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={tokenBadgeVariant(tokenValue)}>
+              {tokenValue ? tokenValue.toUpperCase() : "N/A"}
+            </Badge>
+            <Badge variant={walletBadgeVariant(row.walletType)}>
+              {row.walletType}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Meta */}
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-slate-100 px-3.5 py-2.5 dark:border-white/5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Wallet Address
+            </p>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span
+                className="font-mono text-sm text-slate-700 dark:text-slate-200"
+                title={row.walletAddress}
+              >
+                {shortenAddress(row.walletAddress)}
+              </span>
+              <div className="relative">
+                <button
+                  type="button"
+                  title="Copy wallet address"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyToClipboard(row._id, "address", row.walletAddress);
+                  }}
+                  className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-500 dark:hover:bg-white/5"
+                >
+                  <Copy size={14} />
+                </button>
+                {copiedField?.id === row._id &&
+                  copiedField.field === "address" && <CopiedTooltip />}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-100 px-3.5 py-2.5 dark:border-white/5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Date
+            </p>
+            <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
+              {date}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{time}</p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/5">
+          {renderRowActions(row, true)}
+        </div>
+      </div>
+    );
+  };
+
   const columns: GridColumn<Withdrawal>[] = [
     {
       key: "customer",
@@ -546,35 +777,11 @@ export default function WithdrawalsPage({
       key: "wallet",
       title: "Wallet",
       width: "110px",
-      render: (row) => {
-        let variant:
-          | "success"
-          | "info"
-          | "warning"
-          | "danger"
-          | "secondary" = "secondary";
-
-        switch (row.walletType.toLowerCase()) {
-          case "staking":
-            variant = "success";
-            break;
-          case "affiliate":
-          case "bidaffiliate":
-            variant = "info";
-            break;
-          case "royalty":
-            variant = "warning";
-            break;
-          case "booster":
-          case "bidreward":
-            variant = "secondary";
-            break;
-          default:
-            variant = "danger";
-        }
-
-        return <Badge variant={variant}>{row.walletType}</Badge>;
-      },
+      render: (row) => (
+        <Badge variant={walletBadgeVariant(row.walletType)}>
+          {row.walletType}
+        </Badge>
+      ),
     },
     {
       key: "address",
@@ -613,19 +820,7 @@ export default function WithdrawalsPage({
       title: "Status",
       width: "100px",
       render: (row) => (
-        <Badge
-          variant={
-            row.status === "approved"
-              ? "success"
-              : row.status === "pending"
-                ? "warning"
-                : row.status === "hold"
-                  ? "info"
-                  : "danger"
-          }
-        >
-          {row.status}
-        </Badge>
+        <Badge variant={statusBadgeVariant(row.status)}>{row.status}</Badge>
       ),
     },
     {
@@ -633,21 +828,10 @@ export default function WithdrawalsPage({
       title: "Token",
       width: "80px",
       render: (row) => {
-        const token = (row.token || "").toLowerCase();
-
+        const tokenValue = (row.token || "").toLowerCase();
         return (
-          <Badge
-            variant={
-              token === "mtht"
-                ? "success"
-                : token === "usdt"
-                  ? "warning"
-                  : token === "btmeta"
-                    ? "danger"
-                    : "secondary"
-            }
-          >
-            {token ? token.toUpperCase() : "N/A"}
+          <Badge variant={tokenBadgeVariant(tokenValue)}>
+            {tokenValue ? tokenValue.toUpperCase() : "N/A"}
           </Badge>
         );
       },
@@ -675,72 +859,7 @@ export default function WithdrawalsPage({
       title: "Actions",
       width: "220px",
       truncate: false,
-      render: (row) => {
-        const canChangeStatus =
-          row.status === "pending" || row.status === "hold";
-
-        return (
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedWithdrawal(row);
-                setShowModal(true);
-              }}
-              className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 text-slate-600 dark:text-slate-100 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
-              title="View details"
-            >
-              <Eye size={16} />
-            </button>
-
-            {canChangeStatus && (
-              <>
-                {row.status === "pending" && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRejectReason("");
-                      setStatusAction({ type: "hold", withdrawal: row });
-                    }}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
-                    title="Hold withdrawal"
-                  >
-                    <PauseCircle size={14} />
-                    Hold
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRejectReason("");
-                    setStatusAction({ type: "reject", withdrawal: row });
-                  }}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25"
-                  title="Reject withdrawal"
-                >
-                  <XCircle size={14} />
-                  Reject
-                </button>
-              </>
-            )}
-
-            {!canChangeStatus && (
-              <div className="flex items-center gap-2 min-w-0">
-                <ToggleSwitch
-                  checked={row.status === "approved"}
-                  onChange={(checked) => {
-                    console.log("Approve:", row._id, checked);
-                  }}
-                />
-                <span className="text-xs font-medium text-slate-500 dark:text-slate-300 hidden xl:inline">
-                  Approve
-                </span>
-              </div>
-            )}
-          </div>
-        );
-      },
+      render: (row) => renderRowActions(row),
     },
   ];
 
@@ -827,7 +946,7 @@ export default function WithdrawalsPage({
         )}
       </GridToolbar>
 
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:p-4 dark:border-white/5 dark:bg-[#161827]">
         <label className="flex items-center gap-2.5 cursor-pointer">
           <input
             type="checkbox"
@@ -840,13 +959,16 @@ export default function WithdrawalsPage({
           />
           <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
             Select All
+            {selectedIds.length > 0 && (
+              <span className="ml-1 text-violet-500">({selectedIds.length})</span>
+            )}
           </span>
         </label>
 
         <Button
           variant="success"
-          disabled={selectedIds.length === 0}
-          loading={bulkLoading}
+          className="w-full sm:w-auto !h-10"
+          disabled={selectedIds.length === 0 || bulkLoading}
           onClick={() => setShowBulkApproveConfirm(true)}
         >
           <CheckCircle2 size={18} />
@@ -854,26 +976,34 @@ export default function WithdrawalsPage({
           {selectedIds.length > 0 && ` (${selectedIds.length})`}
         </Button>
 
-        {selectedIds.length > 0 &&
-          selectedTokenTotals.map(([tokenName, total]) => (
-            <span
-              key={tokenName}
-              className="inline-flex items-center gap-1.5 text-sm"
-            >
-              <span className="font-semibold text-slate-700 dark:text-slate-200">
-                {tokenName}
+        {selectedIds.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:ml-auto">
+            {selectedTokenTotals.map(([tokenName, total]) => (
+              <span
+                key={tokenName}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 text-sm dark:bg-emerald-500/10"
+              >
+                <span className="font-semibold text-slate-700 dark:text-slate-200">
+                  {tokenName}
+                </span>
+                <span className="font-semibold text-emerald-500">
+                  {total.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
               </span>
-              <span className="font-semibold text-emerald-500">
-                {total.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
-            </span>
-          ))}
+            ))}
+          </div>
+        )}
       </div>
 
-      <DataGrid columns={columns} data={withdrawals} loading={loading} />
+      <DataGrid
+        columns={columns}
+        data={withdrawals}
+        loading={loading}
+        renderMobile={renderMobileCard}
+      />
 
       <GridPagination
         page={page}
@@ -890,9 +1020,10 @@ export default function WithdrawalsPage({
       {showBulkApproveConfirm && (
         <ConfirmModal
           title="Approve Selected"
-          message={`Are you sure you want to approve ${selectedIds.length} selected withdrawal${selectedIds.length === 1 ? "" : "s"}?`}
-          confirmLabel="Approve"
+          message={`Are you sure you want to approve ${selectedIds.length} selected withdrawal${selectedIds.length === 1 ? "" : "s"}? This action cannot be undone.`}
+          confirmLabel="Yes, Approve"
           cancelLabel="Cancel"
+          confirmVariant="success"
           loading={bulkLoading}
           onConfirm={handleBulkApprove}
           onCancel={() => {

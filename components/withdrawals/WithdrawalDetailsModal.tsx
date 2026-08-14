@@ -84,6 +84,8 @@ export default function WithdrawalDetailsModal({
                     ? "success"
                     : withdrawal.status === "pending"
                     ? "warning"
+                    : withdrawal.status === "hold"
+                    ? "info"
                     : "danger"
                 }
               >
@@ -104,6 +106,15 @@ export default function WithdrawalDetailsModal({
             </div>
 
           </div>
+
+          {withdrawal.rejectreason && (
+            <div>
+              <p className="text-xs text-slate-500 mb-2">Reject Reason</p>
+              <div className="rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-400/20 p-3 text-sm text-rose-700 dark:text-rose-300">
+                {withdrawal.rejectreason}
+              </div>
+            </div>
+          )}
 
           <div>
 

@@ -42,3 +42,19 @@ export const bulkApproveWithdrawals = async (
 
   return response.data;
 };
+
+export type WithdrawalStatusUpdate =
+  | { status: "hold" }
+  | { status: "rejected"; rejectreason: string };
+
+export const updateWithdrawalStatus = async (
+  id: string,
+  payload: WithdrawalStatusUpdate
+): Promise<{ status: boolean; message?: string }> => {
+  const response = await api.put(
+    `/admin/api/v2/withdrawals-record/${id}/status`,
+    payload
+  );
+
+  return response.data;
+};

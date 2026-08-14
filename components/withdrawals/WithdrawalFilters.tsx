@@ -69,6 +69,7 @@ export default function WithdrawalFilters({
         >
           <option value="">Status</option>
           <option value="pending">Pending</option>
+          <option value="hold">Hold</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
         </select>

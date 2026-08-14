@@ -10,7 +10,8 @@ export interface Withdrawal {
   token: string;
   createdAt: string;
   requestamount: number;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "hold";
+  rejectreason?: string;
 }
 
 export interface WithdrawalResponse {

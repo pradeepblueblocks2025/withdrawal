@@ -18,12 +18,15 @@ import {
   Eye,
   Copy,
   CheckCircle2,
+  PauseCircle,
+  XCircle,
 } from "lucide-react";
 
 import { Withdrawal } from "@/types/withdrawal";
 import {
   bulkApproveWithdrawals,
   getWithdrawals,
+  updateWithdrawalStatus,
 } from "@/services/withdrawal.service";
 import { formatToIST } from "@/lib/date";
 import {
@@ -128,6 +131,12 @@ export default function WithdrawalsPage({
 
   const [bulkLoading, setBulkLoading] = useState(false);
   const [showBulkApproveConfirm, setShowBulkApproveConfirm] = useState(false);
+  const [statusActionLoading, setStatusActionLoading] = useState(false);
+  const [statusAction, setStatusAction] = useState<{
+    type: "hold" | "reject";
+    withdrawal: Withdrawal;
+  } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const [token, setToken] = useState("");
   const [dateRange, setDateRange] = useState("");
@@ -317,6 +326,41 @@ export default function WithdrawalsPage({
       console.error(err);
     } finally {
       setBulkLoading(false);
+    }
+  };
+
+  const closeStatusAction = () => {
+    if (statusActionLoading) return;
+    setStatusAction(null);
+    setRejectReason("");
+  };
+
+  const handleStatusActionConfirm = async () => {
+    if (!statusAction) return;
+
+    try {
+      setStatusActionLoading(true);
+
+      if (statusAction.type === "hold") {
+        await updateWithdrawalStatus(statusAction.withdrawal._id, {
+          status: "hold",
+        });
+      } else {
+        const reason = rejectReason.trim();
+        if (!reason) return;
+        await updateWithdrawalStatus(statusAction.withdrawal._id, {
+          status: "rejected",
+          rejectreason: reason,
+        });
+      }
+
+      setStatusAction(null);
+      setRejectReason("");
+      await loadData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setStatusActionLoading(false);
     }
   };
 
@@ -575,7 +619,9 @@ export default function WithdrawalsPage({
               ? "success"
               : row.status === "pending"
                 ? "warning"
-                : "danger"
+                : row.status === "hold"
+                  ? "info"
+                  : "danger"
           }
         >
           {row.status}
@@ -627,33 +673,74 @@ export default function WithdrawalsPage({
     {
       key: "actions",
       title: "Actions",
-      width: "140px",
+      width: "220px",
       truncate: false,
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedWithdrawal(row);
-              setShowModal(true);
-            }}
-            className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 text-slate-600 dark:text-slate-100 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
-          >
-            <Eye size={16} />
-          </button>
-          <div className="flex items-center gap-2 min-w-0">
-            <ToggleSwitch
-              checked={row.status === "approved"}
-              onChange={(checked) => {
-                console.log("Approve:", row._id, checked);
+      render: (row) => {
+        const canChangeStatus =
+          row.status === "pending" || row.status === "hold";
+
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedWithdrawal(row);
+                setShowModal(true);
               }}
-            />
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-300 hidden xl:inline">
-              Approve
-            </span>
+              className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 text-slate-600 dark:text-slate-100 hover:text-white transition flex items-center justify-center cursor-pointer shrink-0"
+              title="View details"
+            >
+              <Eye size={16} />
+            </button>
+
+            {canChangeStatus && (
+              <>
+                {row.status === "pending" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRejectReason("");
+                      setStatusAction({ type: "hold", withdrawal: row });
+                    }}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
+                    title="Hold withdrawal"
+                  >
+                    <PauseCircle size={14} />
+                    Hold
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRejectReason("");
+                    setStatusAction({ type: "reject", withdrawal: row });
+                  }}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25"
+                  title="Reject withdrawal"
+                >
+                  <XCircle size={14} />
+                  Reject
+                </button>
+              </>
+            )}
+
+            {!canChangeStatus && (
+              <div className="flex items-center gap-2 min-w-0">
+                <ToggleSwitch
+                  checked={row.status === "approved"}
+                  onChange={(checked) => {
+                    console.log("Approve:", row._id, checked);
+                  }}
+                />
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-300 hidden xl:inline">
+                  Approve
+                </span>
+              </div>
+            )}
           </div>
-        </div>
-      ),
+        );
+      },
     },
   ];
 
@@ -671,6 +758,7 @@ export default function WithdrawalsPage({
             onChange: updateFilter(setStatus),
             options: [
               { label: "Pending", value: "pending" },
+              { label: "Hold", value: "hold" },
               { label: "Approved", value: "approved" },
               { label: "Rejected", value: "rejected" },
             ],
@@ -810,6 +898,37 @@ export default function WithdrawalsPage({
           onCancel={() => {
             if (!bulkLoading) setShowBulkApproveConfirm(false);
           }}
+        />
+      )}
+
+      {statusAction?.type === "hold" && (
+        <ConfirmModal
+          title="Hold Withdrawal"
+          message={`Put withdrawal for ${statusAction.withdrawal.name} on hold?`}
+          confirmLabel="Hold"
+          cancelLabel="Cancel"
+          confirmVariant="primary"
+          loading={statusActionLoading}
+          onConfirm={handleStatusActionConfirm}
+          onCancel={closeStatusAction}
+        />
+      )}
+
+      {statusAction?.type === "reject" && (
+        <ConfirmModal
+          title="Reject Withdrawal"
+          message={`Reject withdrawal for ${statusAction.withdrawal.name}? Provide a reason below.`}
+          confirmLabel="Reject"
+          cancelLabel="Cancel"
+          confirmVariant="danger"
+          loading={statusActionLoading}
+          reasonLabel="Reject reason"
+          reasonPlaceholder="e.g. Invalid wallet address"
+          reason={rejectReason}
+          onReasonChange={setRejectReason}
+          reasonRequired
+          onConfirm={handleStatusActionConfirm}
+          onCancel={closeStatusAction}
         />
       )}
 

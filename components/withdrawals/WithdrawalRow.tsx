@@ -19,12 +19,14 @@ interface Props {
 
 function statusVariant(
   status: string
-): "success" | "warning" | "danger" | "secondary" {
+): "success" | "warning" | "danger" | "secondary" | "info" {
   switch (status) {
     case "approved":
       return "success";
     case "pending":
       return "warning";
+    case "hold":
+      return "info";
     case "rejected":
       return "danger";
     default:

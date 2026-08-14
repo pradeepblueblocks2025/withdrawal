@@ -17,6 +17,7 @@ const WEBSITE_KEYS: WebsiteKey[] = [
 export const emptyStats = (): WebsiteStats => ({
   totalWithdrawals: 0,
   pendingWithdrawals: 0,
+  holdWithdrawals: 0,
   completedWithdrawals: 0,
   totalAmount: 0,
   totalMtht: 0,
@@ -36,6 +37,7 @@ function normalizeStats(source?: WebsiteStatsRaw): WebsiteStats {
   return {
     totalWithdrawals: Number(source.totalWithdrawals ?? 0),
     pendingWithdrawals: Number(source.pendingWithdrawals ?? 0),
+    holdWithdrawals: Number(source.holdWithdrawals ?? 0),
     completedWithdrawals: Number(
       source.completed ?? source.completedWithdrawals ?? 0
     ),

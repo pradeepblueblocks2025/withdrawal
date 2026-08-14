@@ -7,6 +7,7 @@ import {
   CircleCheckBig,
   Coins,
   DollarSign,
+  PauseCircle,
 } from "lucide-react";
 
 import DashboardSection, {
@@ -54,6 +55,13 @@ function buildStandardCards(stats: WebsiteStats): DashboardCardItem[] {
       icon: Clock3,
       accent: "orange",
       subtitle: "Awaiting action",
+    },
+    {
+      title: "Hold Withdrawals",
+      value: stats.holdWithdrawals,
+      icon: PauseCircle,
+      accent: "amber",
+      subtitle: "On hold",
     },
     {
       title: "Completed",
@@ -214,7 +222,7 @@ export default function DashboardPage() {
             key={site.key}
             title={site.title}
             cards={cards}
-            columns={site.isExora ? 5 : 4}
+            columns={5}
           />
         );
       })}

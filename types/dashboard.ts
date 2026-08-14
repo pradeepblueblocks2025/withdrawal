@@ -1,6 +1,7 @@
 export interface WebsiteStats {
   totalWithdrawals: number;
   pendingWithdrawals: number;
+  holdWithdrawals: number;
   completedWithdrawals: number;
   totalAmount: number;
   totalMtht?: number;
@@ -13,6 +14,7 @@ export type WebsiteKey = "fortunenft" | "fortuneball" | "exora" | "btsmart";
 export interface WebsiteStatsRaw {
   totalWithdrawals?: number;
   pendingWithdrawals?: number;
+  holdWithdrawals?: number;
   completed?: number;
   completedWithdrawals?: number;
   totalAmount?: number;

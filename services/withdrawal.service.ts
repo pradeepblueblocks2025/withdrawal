@@ -12,6 +12,7 @@ export const getWithdrawals = async (
   dateRange = "",
   startDate = "",
   endDate = "",
+  dateSort = "",
   signal?: AbortSignal,
 ): Promise<WithdrawalResponse> => {
   const response = await api.get("/admin/api/v2/allwithdrawals", {
@@ -27,6 +28,7 @@ export const getWithdrawals = async (
       dateRange,
       startDate,
       endDate,
+      ...(dateSort ? { dateSort } : {}),
     },
   });
 

@@ -197,6 +197,7 @@ export default function WithdrawalsPage({
   const [dateRange, setDateRange] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [dateSort, setDateSort] = useState<"asc" | "desc">("desc");
 
   const [selectedWithdrawal, setSelectedWithdrawal] =
     useState<Withdrawal | null>(null);
@@ -278,6 +279,7 @@ export default function WithdrawalsPage({
     dateRange,
     startDate,
     endDate,
+    dateSort,
   ]);
 
   const updateFilter = (setter: (value: string) => void) => (value: string) => {
@@ -460,6 +462,7 @@ export default function WithdrawalsPage({
         dateRange,
         startDate,
         endDate,
+        dateSort,
         options?.signal
       );
 
@@ -562,7 +565,7 @@ export default function WithdrawalsPage({
     const serial = getSerialNumber(row);
     return (
       <span
-        className={`inline-flex min-w-8 h-8 items-center justify-center rounded-xl border px-2 text-sm font-bold tabular-nums ${statusSerialClass(row.status)}`}
+        className={`inline-flex min-w-6 h-6 items-center justify-center rounded-lg border px-1.5 text-[11px] font-semibold tabular-nums ${statusSerialClass(row.status)}`}
         title={`${row.status} · #${serial}`}
       >
         {serial}
@@ -767,7 +770,7 @@ export default function WithdrawalsPage({
     {
       key: "serial",
       title: "#",
-      width: "56px",
+      width: "44px",
       align: "center",
       truncate: false,
       render: (row) => renderSerial(row),
@@ -900,6 +903,7 @@ export default function WithdrawalsPage({
       key: "date",
       title: "Date",
       width: "120px",
+      sortable: true,
       render: (row) => {
         const { date, time } = formatToIST(row.createdAt);
         return (
@@ -1070,6 +1074,13 @@ export default function WithdrawalsPage({
         columns={columns}
         data={withdrawals}
         loading={loading}
+        sortKey="date"
+        sortOrder={dateSort}
+        onSort={(key) => {
+          if (key !== "date") return;
+          setPage(1);
+          setDateSort((prev) => (prev === "asc" ? "desc" : "asc"));
+        }}
         renderMobile={renderMobileCard}
       />
 

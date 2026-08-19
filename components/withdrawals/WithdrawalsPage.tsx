@@ -118,6 +118,21 @@ function statusBadgeVariant(
   return "danger";
 }
 
+function statusSerialClass(status: string): string {
+  switch (status) {
+    case "approved":
+      return "bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/30";
+    case "pending":
+      return "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-400/30";
+    case "hold":
+      return "bg-sky-50 text-sky-700 border-sky-100 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-400/30";
+    case "rejected":
+      return "bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-400/30";
+    default:
+      return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/20 dark:text-slate-200 dark:border-slate-400/30";
+  }
+}
+
 function tokenBadgeVariant(
   token: string
 ): "success" | "warning" | "danger" | "secondary" {
@@ -168,13 +183,15 @@ export default function WithdrawalsPage({
   } | null>(null);
 
   const [bulkLoading, setBulkLoading] = useState(false);
-  const [showBulkApproveConfirm, setShowBulkApproveConfirm] = useState(false);
   const [statusActionLoading, setStatusActionLoading] = useState(false);
-  const [statusAction, setStatusAction] = useState<{
-    type: "hold" | "reject";
-    withdrawal: Withdrawal;
-  } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<
+    | { type: "bulk-approve" }
+    | { type: "hold"; withdrawal: Withdrawal }
+    | { type: "reject"; withdrawal: Withdrawal }
+    | null
+  >(null);
   const [rejectReason, setRejectReason] = useState("");
+  const confirmOpenRef = useRef(false);
 
   const [token, setToken] = useState("");
   const [dateRange, setDateRange] = useState("");
@@ -351,14 +368,16 @@ export default function WithdrawalsPage({
   };
 
   const handleBulkApprove = async () => {
-    if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0 || bulkLoading) return;
 
     try {
       setBulkLoading(true);
       await bulkApproveWithdrawals(selectedIds);
       setSelectedIds([]);
       setSelectedMeta({});
-      setShowBulkApproveConfirm(false);
+      confirmOpenRef.current = false;
+      setConfirmDialog(null);
+      setRejectReason("");
       await loadData();
     } catch (err) {
       console.error(err);
@@ -367,32 +386,47 @@ export default function WithdrawalsPage({
     }
   };
 
-  const closeStatusAction = () => {
-    if (statusActionLoading) return;
-    setStatusAction(null);
+  const openConfirmDialog = (
+    dialog:
+      | { type: "bulk-approve" }
+      | { type: "hold"; withdrawal: Withdrawal }
+      | { type: "reject"; withdrawal: Withdrawal }
+  ) => {
+    if (confirmOpenRef.current || bulkLoading || statusActionLoading) return;
+    confirmOpenRef.current = true;
+    setRejectReason("");
+    setConfirmDialog(dialog);
+  };
+
+  const closeConfirmDialog = () => {
+    if (bulkLoading || statusActionLoading) return;
+    confirmOpenRef.current = false;
+    setConfirmDialog(null);
     setRejectReason("");
   };
 
   const handleStatusActionConfirm = async () => {
-    if (!statusAction) return;
+    if (!confirmDialog || confirmDialog.type === "bulk-approve") return;
+    if (statusActionLoading) return;
 
     try {
       setStatusActionLoading(true);
 
-      if (statusAction.type === "hold") {
-        await updateWithdrawalStatus(statusAction.withdrawal._id, {
+      if (confirmDialog.type === "hold") {
+        await updateWithdrawalStatus(confirmDialog.withdrawal._id, {
           status: "hold",
         });
       } else {
         const reason = rejectReason.trim();
         if (!reason) return;
-        await updateWithdrawalStatus(statusAction.withdrawal._id, {
+        await updateWithdrawalStatus(confirmDialog.withdrawal._id, {
           status: "rejected",
           rejectreason: reason,
         });
       }
 
-      setStatusAction(null);
+      confirmOpenRef.current = false;
+      setConfirmDialog(null);
       setRejectReason("");
       await loadData();
     } catch (err) {
@@ -518,6 +552,24 @@ export default function WithdrawalsPage({
     </div>
   );
 
+  const getSerialNumber = (row: Withdrawal) => {
+    const index = withdrawals.findIndex((item) => item._id === row._id);
+    if (index < 0) return 0;
+    return (page - 1) * pageSize + index + 1;
+  };
+
+  const renderSerial = (row: Withdrawal) => {
+    const serial = getSerialNumber(row);
+    return (
+      <span
+        className={`inline-flex min-w-8 h-8 items-center justify-center rounded-xl border px-2 text-sm font-bold tabular-nums ${statusSerialClass(row.status)}`}
+        title={`${row.status} · #${serial}`}
+      >
+        {serial}
+      </span>
+    );
+  };
+
   const renderRowActions = (row: Withdrawal, compact = false) => {
     const canChangeStatus =
       row.status === "pending" || row.status === "hold";
@@ -544,8 +596,7 @@ export default function WithdrawalsPage({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setRejectReason("");
-                  setStatusAction({ type: "hold", withdrawal: row });
+                  openConfirmDialog({ type: "hold", withdrawal: row });
                 }}
                 className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25 sm:flex-none"
                 title="Hold withdrawal"
@@ -559,8 +610,7 @@ export default function WithdrawalsPage({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setRejectReason("");
-                setStatusAction({ type: "reject", withdrawal: row });
+                openConfirmDialog({ type: "reject", withdrawal: row });
               }}
               className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25 sm:flex-none"
               title="Reject withdrawal"
@@ -596,6 +646,8 @@ export default function WithdrawalsPage({
       <div className="p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-start gap-3">
+          {renderSerial(row)}
+
           <input
             type="checkbox"
             checked={selectedIds.includes(row._id)}
@@ -712,6 +764,14 @@ export default function WithdrawalsPage({
   };
 
   const columns: GridColumn<Withdrawal>[] = [
+    {
+      key: "serial",
+      title: "#",
+      width: "56px",
+      align: "center",
+      truncate: false,
+      render: (row) => renderSerial(row),
+    },
     {
       key: "customer",
       title: "Customer",
@@ -968,8 +1028,16 @@ export default function WithdrawalsPage({
         <Button
           variant="success"
           className="w-full sm:w-auto !h-10"
-          disabled={selectedIds.length === 0 || bulkLoading}
-          onClick={() => setShowBulkApproveConfirm(true)}
+          disabled={
+            selectedIds.length === 0 ||
+            bulkLoading ||
+            confirmDialog?.type === "bulk-approve"
+          }
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openConfirmDialog({ type: "bulk-approve" });
+          }}
         >
           <CheckCircle2 size={18} />
           Approve Selected
@@ -1017,7 +1085,7 @@ export default function WithdrawalsPage({
         }}
       />
 
-      {showBulkApproveConfirm && (
+      {confirmDialog?.type === "bulk-approve" && (
         <ConfirmModal
           title="Approve Selected"
           message={`Are you sure you want to approve ${selectedIds.length} selected withdrawal${selectedIds.length === 1 ? "" : "s"}? This action cannot be undone.`}
@@ -1026,29 +1094,27 @@ export default function WithdrawalsPage({
           confirmVariant="success"
           loading={bulkLoading}
           onConfirm={handleBulkApprove}
-          onCancel={() => {
-            if (!bulkLoading) setShowBulkApproveConfirm(false);
-          }}
+          onCancel={closeConfirmDialog}
         />
       )}
 
-      {statusAction?.type === "hold" && (
+      {confirmDialog?.type === "hold" && (
         <ConfirmModal
           title="Hold Withdrawal"
-          message={`Put withdrawal for ${statusAction.withdrawal.name} on hold?`}
+          message={`Put withdrawal for ${confirmDialog.withdrawal.name} on hold?`}
           confirmLabel="Hold"
           cancelLabel="Cancel"
           confirmVariant="primary"
           loading={statusActionLoading}
           onConfirm={handleStatusActionConfirm}
-          onCancel={closeStatusAction}
+          onCancel={closeConfirmDialog}
         />
       )}
 
-      {statusAction?.type === "reject" && (
+      {confirmDialog?.type === "reject" && (
         <ConfirmModal
           title="Reject Withdrawal"
-          message={`Reject withdrawal for ${statusAction.withdrawal.name}? Provide a reason below.`}
+          message={`Reject withdrawal for ${confirmDialog.withdrawal.name}? Provide a reason below.`}
           confirmLabel="Reject"
           cancelLabel="Cancel"
           confirmVariant="danger"
@@ -1059,7 +1125,7 @@ export default function WithdrawalsPage({
           onReasonChange={setRejectReason}
           reasonRequired
           onConfirm={handleStatusActionConfirm}
-          onCancel={closeStatusAction}
+          onCancel={closeConfirmDialog}
         />
       )}
 

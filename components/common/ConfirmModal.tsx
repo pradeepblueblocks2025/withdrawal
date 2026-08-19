@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import Button from "@/components/common/Button";
@@ -21,6 +21,18 @@ interface Props {
   onCancel: () => void;
 }
 
+const PORTAL_ID = "app-confirm-modal-root";
+
+function getPortalRoot(): HTMLElement {
+  let root = document.getElementById(PORTAL_ID);
+  if (!root) {
+    root = document.createElement("div");
+    root.id = PORTAL_ID;
+    document.body.appendChild(root);
+  }
+  return root;
+}
+
 export default function ConfirmModal({
   title,
   message,
@@ -36,44 +48,80 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: Props) {
+  const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+  const [allowDismiss, setAllowDismiss] = useState(false);
+  const onCancelRef = useRef(onCancel);
+  const onConfirmRef = useRef(onConfirm);
+  const confirmingRef = useRef(false);
+
+  onCancelRef.current = onCancel;
+  onConfirmRef.current = onConfirm;
+
   const showReason = typeof onReasonChange === "function";
   const reasonMissing =
     reasonRequired && showReason && !reason?.trim();
 
   useEffect(() => {
+    setMounted(true);
+    // Ignore the click that opened the modal so it can't stack/dismiss instantly
+    const timer = window.setTimeout(() => setAllowDismiss(true), 150);
+    confirmingRef.current = false;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !loading) onCancel();
+      if (e.key === "Escape" && !loading) {
+        onCancelRef.current();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [loading, onCancel]);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [loading]);
+
+  const handleConfirm = () => {
+    if (loading || reasonMissing || confirmingRef.current) return;
+    confirmingRef.current = true;
+    onConfirmRef.current();
+  };
+
+  const handleCancel = () => {
+    if (loading || !allowDismiss) return;
+    onCancelRef.current();
+  };
 
   const modal = (
     <div
       className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 p-5"
-      onClick={() => {
-        if (!loading) onCancel();
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) handleCancel();
       }}
       role="presentation"
     >
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="confirm-modal-title"
+        aria-labelledby={titleId}
         className="w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-slate-900"
-        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-700">
           <h2
-            id="confirm-modal-title"
+            id={titleId}
             className="text-lg font-bold text-slate-900 dark:text-white"
           >
             {title}
           </h2>
           <button
             type="button"
-            onClick={onCancel}
-            disabled={loading}
+            onClick={handleCancel}
+            disabled={loading || !allowDismiss}
             className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 disabled:opacity-50 dark:hover:bg-slate-800"
           >
             <X size={20} />
@@ -110,8 +158,8 @@ export default function ConfirmModal({
           <Button
             type="button"
             variant="outline"
-            onClick={onCancel}
-            disabled={loading}
+            onClick={handleCancel}
+            disabled={loading || !allowDismiss}
           >
             {cancelLabel}
           </Button>
@@ -120,7 +168,7 @@ export default function ConfirmModal({
             variant={confirmVariant}
             loading={loading}
             disabled={reasonMissing}
-            onClick={onConfirm}
+            onClick={handleConfirm}
           >
             {confirmLabel}
           </Button>
@@ -129,6 +177,6 @@ export default function ConfirmModal({
     </div>
   );
 
-  if (typeof document === "undefined") return null;
-  return createPortal(modal, document.body);
+  if (!mounted) return null;
+  return createPortal(modal, getPortalRoot());
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+import ScrollToTop from "@/components/common/ScrollToTop";
 import { useSidebarCollapsed } from "@/hooks/useSidebarCollapsed";
 
 export default function WithdrawalsLayout({
@@ -31,6 +32,8 @@ export default function WithdrawalsLayout({
 
         <main className="p-3 sm:p-5 lg:p-8 min-h-[calc(100vh-72px)]">{children}</main>
       </div>
+
+      <ScrollToTop />
     </div>
   );
 }

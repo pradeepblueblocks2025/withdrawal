@@ -1010,7 +1010,7 @@ export default function WithdrawalsPage({
         )}
       </GridToolbar>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:p-4 dark:border-white/5 dark:bg-[#161827]">
+      <div className="sticky top-[72px] z-30 flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white/95 p-3.5 shadow-sm backdrop-blur-md sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:p-4 dark:border-white/5 dark:bg-[#161827]/95 dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
         <label className="flex items-center gap-2.5 cursor-pointer">
           <input
             type="checkbox"

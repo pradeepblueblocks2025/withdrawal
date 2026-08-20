@@ -6,7 +6,7 @@ export default function Page() {
   return (
     <WithdrawalsPage
       website="fortunenft"
-      title="Withdrawal Management"
+      title="Fortune NFT"
     />
   );
 }

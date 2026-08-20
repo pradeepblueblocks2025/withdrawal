@@ -4,8 +4,23 @@ import { Search, Menu, ExternalLink } from "lucide-react";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
-const BSCSCAN_TRANSACTIONS_URL =
+const BSCSCAN_DEFAULT_URL =
   "https://bscscan.com/token/0xc968f1c545f2714c3140208e1e0adbf1958f2ff7?a=0xE36e5c017373486bcA2bCD733F23bbB697E16102#transactions";
+
+const BSCSCAN_BTSMART_URL =
+  "https://bscscan.com/token/0x962d3e1397767310451EE72068B2E5bCef738bd8?a=0xE36e5c017373486bcA2bCD733F23bbB697E16102#transactions";
+
+function getBscScanUrl(pathname: string): string {
+  if (
+    pathname === "/withdrawals/btsmart" ||
+    pathname.startsWith("/withdrawals/btsmart/")
+  ) {
+    return BSCSCAN_BTSMART_URL;
+  }
+
+  // Fortune NFT, FortuneBall, Exora, Dashboard — shared wallet link
+  return BSCSCAN_DEFAULT_URL;
+}
 
 const PAGE_TITLES: { match: (path: string) => boolean; title: string }[] = [
   {
@@ -31,7 +46,7 @@ const PAGE_TITLES: { match: (path: string) => boolean; title: string }[] = [
   },
   {
     match: (path) => path === "/withdrawals" || path.startsWith("/withdrawals/"),
-    title: "FortuneNFT Withdrawals",
+    title: "Fortune NFT",
   },
 ];
 
@@ -47,6 +62,7 @@ interface HeaderProps {
 export default function Header({ setMobileOpen }: HeaderProps) {
   const pathname = usePathname();
   const pageTitle = getPageTitle(pathname);
+  const bscScanUrl = getBscScanUrl(pathname);
 
   return (
     <header className="sticky top-0 z-40 h-[72px] bg-white/90 dark:bg-[#0b0c14]/95 backdrop-blur border-b border-slate-100 dark:border-white/5 px-6 lg:px-8 flex items-center justify-between gap-4">
@@ -74,7 +90,7 @@ export default function Header({ setMobileOpen }: HeaderProps) {
 
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <a
-          href={BSCSCAN_TRANSACTIONS_URL}
+          href={bscScanUrl}
           target="_blank"
           rel="noopener noreferrer"
           title="View BscScan transactions"

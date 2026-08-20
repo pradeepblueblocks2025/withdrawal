@@ -78,7 +78,7 @@ export default function Sidebar({
           bg-white dark:bg-[#12141f]
           border-r border-slate-100 dark:border-white/5
           z-50 transition-all duration-300 lg:translate-x-0
-          flex flex-col
+          flex flex-col overflow-visible
           w-64
           ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           ${collapsed ? "lg:w-20" : "lg:w-64"}
@@ -126,7 +126,7 @@ export default function Sidebar({
           </button>
         </div>
 
-        <nav className="px-3 space-y-1.5 flex-1 overflow-y-auto">
+        <nav className="px-3 space-y-1.5 flex-1 overflow-visible">
           {menus.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -140,33 +140,65 @@ export default function Sidebar({
                 onClick={() => setMobileOpen(false)}
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition
+                className={`group relative flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition
                   ${collapsed ? "lg:justify-center lg:px-0" : ""}
                   ${
                     isActive
                       ? "brand-gradient text-white shadow-md shadow-violet-500/30"
                       : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
                   }`}
-                title={item.name}
               >
                 <Icon size={18} className="shrink-0" />
                 <span className={collapsed ? "lg:hidden" : ""}>{item.name}</span>
+
+                {collapsed && (
+                  <span
+                    className="
+                      pointer-events-none absolute left-full top-1/2 z-[60] ml-3
+                      -translate-y-1/2 whitespace-nowrap
+                      rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white
+                      opacity-0 shadow-lg transition duration-150
+                      group-hover:opacity-100
+                      dark:bg-violet-600
+                      max-lg:hidden
+                    "
+                  >
+                    {item.name}
+                    <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-violet-600" />
+                  </span>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="px-3 pb-5">
+        <div className="px-3 pb-5 overflow-x-visible">
           <button
             type="button"
             onClick={logout}
-            className={`flex items-center gap-3 text-rose-500 hover:text-rose-400 px-3.5 py-3 rounded-xl w-full hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer text-sm font-medium ${
+            className={`group relative flex items-center gap-3 text-rose-500 hover:text-rose-400 px-3.5 py-3 rounded-xl w-full hover:bg-rose-50 dark:hover:bg-rose-500/10 cursor-pointer text-sm font-medium ${
               collapsed ? "lg:justify-center lg:px-0" : ""
             }`}
-            title="Logout"
           >
             <LogOut size={18} className="shrink-0" />
             <span className={collapsed ? "lg:hidden" : ""}>Logout</span>
+
+            {collapsed && (
+              <span
+                className="
+                  pointer-events-none absolute left-full top-1/2 z-[60] ml-3
+                  -translate-y-1/2 whitespace-nowrap
+                  rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white
+                  opacity-0 shadow-lg transition duration-150
+                  group-hover:opacity-100
+                  dark:bg-violet-600
+                  max-lg:hidden
+                "
+              >
+                Logout
+                <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-violet-600" />
+              </span>
+            )}
           </button>
         </div>
       </aside>

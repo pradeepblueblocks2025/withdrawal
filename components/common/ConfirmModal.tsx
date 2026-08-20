@@ -53,10 +53,12 @@ export default function ConfirmModal({
   const [allowDismiss, setAllowDismiss] = useState(false);
   const onCancelRef = useRef(onCancel);
   const onConfirmRef = useRef(onConfirm);
+  const loadingRef = useRef(loading);
   const confirmingRef = useRef(false);
 
   onCancelRef.current = onCancel;
   onConfirmRef.current = onConfirm;
+  loadingRef.current = loading;
 
   const showReason = typeof onReasonChange === "function";
   const reasonMissing =
@@ -64,15 +66,14 @@ export default function ConfirmModal({
 
   useEffect(() => {
     setMounted(true);
-    // Ignore the click that opened the modal so it can't stack/dismiss instantly
-    const timer = window.setTimeout(() => setAllowDismiss(true), 150);
     confirmingRef.current = false;
+    const timer = window.setTimeout(() => setAllowDismiss(true), 200);
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !loading) {
+      if (e.key === "Escape" && !loadingRef.current) {
         onCancelRef.current();
       }
     };
@@ -83,16 +84,16 @@ export default function ConfirmModal({
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [loading]);
+  }, []);
 
   const handleConfirm = () => {
-    if (loading || reasonMissing || confirmingRef.current) return;
+    if (loadingRef.current || reasonMissing || confirmingRef.current) return;
     confirmingRef.current = true;
     onConfirmRef.current();
   };
 
   const handleCancel = () => {
-    if (loading || !allowDismiss) return;
+    if (loadingRef.current || !allowDismiss) return;
     onCancelRef.current();
   };
 
@@ -167,7 +168,7 @@ export default function ConfirmModal({
             type="button"
             variant={confirmVariant}
             loading={loading}
-            disabled={reasonMissing}
+            disabled={reasonMissing || loading}
             onClick={handleConfirm}
           >
             {confirmLabel}

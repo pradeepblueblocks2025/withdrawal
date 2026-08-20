@@ -379,19 +379,24 @@ export default function WithdrawalsPage({
   const handleBulkApprove = async () => {
     if (selectedIds.length === 0 || bulkLoading) return;
 
+    const ids = [...selectedIds];
+
+    // Close confirm immediately so it cannot reopen after loading
+    confirmOpenRef.current = false;
+    setConfirmDialog(null);
+    setRejectReason("");
+
     try {
       setBulkLoading(true);
-      await bulkApproveWithdrawals(selectedIds);
+      await bulkApproveWithdrawals(ids);
       setSelectedIds([]);
       setSelectedMeta({});
-      confirmOpenRef.current = false;
-      setConfirmDialog(null);
-      setRejectReason("");
       await loadData();
     } catch (err) {
       console.error(err);
     } finally {
       setBulkLoading(false);
+      confirmOpenRef.current = false;
     }
   };
 
@@ -418,30 +423,37 @@ export default function WithdrawalsPage({
     if (!confirmDialog || confirmDialog.type === "bulk-approve") return;
     if (statusActionLoading) return;
 
+    const action = confirmDialog;
+
+    confirmOpenRef.current = false;
+    setConfirmDialog(null);
+
     try {
       setStatusActionLoading(true);
 
-      if (confirmDialog.type === "hold") {
-        await updateWithdrawalStatus(confirmDialog.withdrawal._id, {
+      if (action.type === "hold") {
+        await updateWithdrawalStatus(action.withdrawal._id, {
           status: "hold",
         });
       } else {
         const reason = rejectReason.trim();
-        if (!reason) return;
-        await updateWithdrawalStatus(confirmDialog.withdrawal._id, {
+        if (!reason) {
+          setStatusActionLoading(false);
+          return;
+        }
+        await updateWithdrawalStatus(action.withdrawal._id, {
           status: "rejected",
           rejectreason: reason,
         });
       }
 
-      confirmOpenRef.current = false;
-      setConfirmDialog(null);
       setRejectReason("");
       await loadData();
     } catch (err) {
       console.error(err);
     } finally {
       setStatusActionLoading(false);
+      confirmOpenRef.current = false;
     }
   };
 
@@ -1081,6 +1093,7 @@ export default function WithdrawalsPage({
             bulkLoading ||
             confirmDialog?.type === "bulk-approve"
           }
+          loading={bulkLoading}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -1152,7 +1165,7 @@ export default function WithdrawalsPage({
           confirmLabel="Yes, Approve"
           cancelLabel="Cancel"
           confirmVariant="success"
-          loading={bulkLoading}
+          loading={false}
           onConfirm={handleBulkApprove}
           onCancel={closeConfirmDialog}
         />

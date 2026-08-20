@@ -1,10 +1,43 @@
 "use client";
 
 import { Search, Menu, ExternalLink } from "lucide-react";
+import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 const BSCSCAN_TRANSACTIONS_URL =
   "https://bscscan.com/token/0xc968f1c545f2714c3140208e1e0adbf1958f2ff7?a=0xE36e5c017373486bcA2bCD733F23bbB697E16102#transactions";
+
+const PAGE_TITLES: { match: (path: string) => boolean; title: string }[] = [
+  {
+    match: (path) => path === "/dashboard" || path.startsWith("/dashboard/"),
+    title: "Dashboard",
+  },
+  {
+    match: (path) =>
+      path === "/withdrawals/fortuneball" ||
+      path.startsWith("/withdrawals/fortuneball/"),
+    title: "FortuneBall Withdrawals",
+  },
+  {
+    match: (path) =>
+      path === "/withdrawals/exora" || path.startsWith("/withdrawals/exora/"),
+    title: "Exora Withdrawals",
+  },
+  {
+    match: (path) =>
+      path === "/withdrawals/btsmart" ||
+      path.startsWith("/withdrawals/btsmart/"),
+    title: "BTSmart Withdrawals",
+  },
+  {
+    match: (path) => path === "/withdrawals" || path.startsWith("/withdrawals/"),
+    title: "FortuneNFT Withdrawals",
+  },
+];
+
+function getPageTitle(pathname: string): string {
+  return PAGE_TITLES.find((item) => item.match(pathname))?.title ?? "Dashboard";
+}
 
 interface HeaderProps {
   mobileOpen: boolean;
@@ -12,6 +45,9 @@ interface HeaderProps {
 }
 
 export default function Header({ setMobileOpen }: HeaderProps) {
+  const pathname = usePathname();
+  const pageTitle = getPageTitle(pathname);
+
   return (
     <header className="sticky top-0 z-40 h-[72px] bg-white/90 dark:bg-[#0b0c14]/95 backdrop-blur border-b border-slate-100 dark:border-white/5 px-6 lg:px-8 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3 min-w-0">
@@ -23,8 +59,8 @@ export default function Header({ setMobileOpen }: HeaderProps) {
           <Menu size={22} />
         </button>
 
-        <h2 className="font-semibold text-xl text-slate-900 dark:text-white tracking-tight">
-          Dashboard
+        <h2 className="font-semibold text-xl text-slate-900 dark:text-white tracking-tight truncate">
+          {pageTitle}
         </h2>
       </div>
 

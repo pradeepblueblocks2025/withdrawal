@@ -1,7 +1,10 @@
 "use client";
 
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search, Menu, ExternalLink } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+
+const BSCSCAN_TRANSACTIONS_URL =
+  "https://bscscan.com/token/0xc968f1c545f2714c3140208e1e0adbf1958f2ff7?a=0xE36e5c017373486bcA2bCD733F23bbB697E16102#transactions";
 
 interface HeaderProps {
   mobileOpen: boolean;
@@ -33,7 +36,18 @@ export default function Header({ setMobileOpen }: HeaderProps) {
         />
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <a
+          href={BSCSCAN_TRANSACTIONS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View BscScan transactions"
+          className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-2.5 sm:px-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-[#161827] dark:text-slate-200 dark:hover:bg-white/5"
+        >
+          <ExternalLink size={16} className="shrink-0 text-violet-500" />
+          <span className="hidden sm:inline">BscScan</span>
+        </a>
+
         <ThemeToggle />
 
         <button

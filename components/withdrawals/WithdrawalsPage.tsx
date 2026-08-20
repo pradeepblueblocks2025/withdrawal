@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   PauseCircle,
   XCircle,
+  ChevronDown,
 } from "lucide-react";
 
 import { Withdrawal } from "@/types/withdrawal";
@@ -203,6 +204,7 @@ export default function WithdrawalsPage({
     useState<Withdrawal | null>(null);
 
   const [showModal, setShowModal] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const hasLoadedOnce = useRef(false);
   const requestIdRef = useRef(0);
@@ -212,9 +214,14 @@ export default function WithdrawalsPage({
     setSelectedIds([]);
     setSelectedMeta({});
     setWalletType("");
+    setExpandedIds(new Set());
     knownTotalRef.current = null;
     hasLoadedOnce.current = false;
   }, [website]);
+
+  useEffect(() => {
+    setExpandedIds(new Set());
+  }, [page, pageSize, website]);
 
   useEffect(() => {
     const unlock = async () => {
@@ -641,13 +648,35 @@ export default function WithdrawalsPage({
     );
   };
 
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const renderMobileCard = (row: Withdrawal) => {
     const { date, time } = formatToIST(row.createdAt);
     const tokenValue = (row.token || "").toLowerCase();
+    const expanded = expandedIds.has(row._id);
 
     return (
-      <div className="p-4 sm:p-5">
-        {/* Header */}
+      <div
+        className="p-4 sm:p-5 cursor-pointer"
+        onClick={() => toggleExpanded(row._id)}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleExpanded(row._id);
+          }
+        }}
+      >
+        {/* Top portion — always visible */}
         <div className="flex items-start gap-3">
           {renderSerial(row)}
 
@@ -675,14 +704,21 @@ export default function WithdrawalsPage({
                   {row.email}
                 </p>
               </div>
-              <Badge variant={statusBadgeVariant(row.status)}>
-                {row.status}
-              </Badge>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <Badge variant={statusBadgeVariant(row.status)}>
+                  {row.status}
+                </Badge>
+                <ChevronDown
+                  size={16}
+                  className={`text-slate-400 transition-transform duration-200 ${
+                    expanded ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Amount strip */}
         <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3.5 py-3 dark:bg-[#1c1f30]">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
@@ -716,52 +752,60 @@ export default function WithdrawalsPage({
           </div>
         </div>
 
-        {/* Meta */}
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-slate-100 px-3.5 py-2.5 dark:border-white/5">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-              Wallet Address
-            </p>
-            <div className="mt-1 flex items-center gap-1.5">
-              <span
-                className="font-mono text-sm text-slate-700 dark:text-slate-200"
-                title={row.walletAddress}
-              >
-                {shortenAddress(row.walletAddress)}
-              </span>
-              <div className="relative">
-                <button
-                  type="button"
-                  title="Copy wallet address"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyToClipboard(row._id, "address", row.walletAddress);
-                  }}
-                  className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-500 dark:hover:bg-white/5"
-                >
-                  <Copy size={14} />
-                </button>
-                {copiedField?.id === row._id &&
-                  copiedField.field === "address" && <CopiedTooltip />}
+        {/* Bottom portion — expanded only */}
+        {expanded && (
+          <div
+            className="mt-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-slate-100 px-3.5 py-2.5 dark:border-white/5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Wallet Address
+                </p>
+                <div className="mt-1 flex items-center gap-1.5">
+                  <span
+                    className="font-mono text-sm text-slate-700 dark:text-slate-200"
+                    title={row.walletAddress}
+                  >
+                    {shortenAddress(row.walletAddress)}
+                  </span>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      title="Copy wallet address"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyToClipboard(row._id, "address", row.walletAddress);
+                      }}
+                      className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-500 dark:hover:bg-white/5"
+                    >
+                      <Copy size={14} />
+                    </button>
+                    {copiedField?.id === row._id &&
+                      copiedField.field === "address" && <CopiedTooltip />}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 px-3.5 py-2.5 dark:border-white/5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Date
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
+                  {date}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {time}
+                </p>
               </div>
             </div>
-          </div>
 
-          <div className="rounded-xl border border-slate-100 px-3.5 py-2.5 dark:border-white/5">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-              Date
-            </p>
-            <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
-              {date}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{time}</p>
+            <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/5">
+              {renderRowActions(row, true)}
+            </div>
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/5">
-          {renderRowActions(row, true)}
-        </div>
+        )}
       </div>
     );
   };

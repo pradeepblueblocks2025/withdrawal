@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, Menu, ExternalLink } from "lucide-react";
+import { Search, Menu, ExternalLink } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 const BSCSCAN_TRANSACTIONS_URL =
@@ -49,16 +49,6 @@ export default function Header({ setMobileOpen }: HeaderProps) {
         </a>
 
         <ThemeToggle />
-
-        <button
-          type="button"
-          className="relative h-10 w-10 rounded-full bg-slate-50 dark:bg-[#161827] flex items-center justify-center text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer border border-transparent dark:border-white/5"
-        >
-          <Bell size={18} />
-          <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center">
-            3
-          </span>
-        </button>
 
         <div className="flex items-center gap-2.5 pl-1">
           <div className="h-10 w-10 rounded-full brand-gradient text-white text-sm font-bold flex items-center justify-center shadow-sm shadow-violet-500/30">

@@ -1054,8 +1054,8 @@ export default function WithdrawalsPage({
         )}
       </GridToolbar>
 
-      <div className="sticky top-[72px] z-30 flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white/95 p-3.5 shadow-sm backdrop-blur-md sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 sm:p-4 dark:border-white/5 dark:bg-[#161827]/95 dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
-        <label className="flex items-center gap-2.5 cursor-pointer">
+      <div className="sticky top-[72px] z-30 flex flex-row flex-wrap items-center gap-2.5 rounded-2xl border border-slate-100 bg-white/95 p-3 shadow-sm backdrop-blur-md sm:gap-4 sm:p-4 dark:border-white/5 dark:bg-[#161827]/95 dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+        <label className="flex shrink-0 items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={
@@ -1065,7 +1065,7 @@ export default function WithdrawalsPage({
             onChange={toggleSelectAll}
             className="h-4 w-4 rounded border-slate-300 accent-indigo-500"
           />
-          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+          <span className="text-sm font-medium whitespace-nowrap text-slate-600 dark:text-slate-300">
             Select All
             {selectedIds.length > 0 && (
               <span className="ml-1 text-violet-500">({selectedIds.length})</span>
@@ -1075,7 +1075,7 @@ export default function WithdrawalsPage({
 
         <Button
           variant="success"
-          className="w-full sm:w-auto !h-10"
+          className="!h-9 !px-3 text-xs sm:!h-10 sm:!px-5 sm:text-sm ml-auto"
           disabled={
             selectedIds.length === 0 ||
             bulkLoading ||
@@ -1087,13 +1087,18 @@ export default function WithdrawalsPage({
             openConfirmDialog({ type: "bulk-approve" });
           }}
         >
-          <CheckCircle2 size={18} />
-          Approve Selected
-          {selectedIds.length > 0 && ` (${selectedIds.length})`}
+          <CheckCircle2 size={16} />
+          <span className="sm:hidden">
+            Approve{selectedIds.length > 0 ? ` (${selectedIds.length})` : ""}
+          </span>
+          <span className="hidden sm:inline">
+            Approve Selected
+            {selectedIds.length > 0 && ` (${selectedIds.length})`}
+          </span>
         </Button>
 
         {selectedIds.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:ml-auto">
+          <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 sm:ml-0 sm:w-auto">
             {selectedTokenTotals.map(([tokenName, total]) => (
               <span
                 key={tokenName}

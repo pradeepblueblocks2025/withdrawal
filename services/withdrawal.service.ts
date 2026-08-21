@@ -38,9 +38,11 @@ export const getWithdrawals = async (
 export const bulkApproveWithdrawals = async (
   ids: string[]
 ): Promise<{ status: boolean; message?: string }> => {
-  const response = await api.post("/admin/api/v2/batch-withdrawals/approve-all", {
-    ids,
-  });
+  const response = await api.post(
+    "/admin/api/v2/batch-withdrawals/approve-all",
+    { ids },
+    { timeout: 60_000 }
+  );
 
   return response.data;
 };

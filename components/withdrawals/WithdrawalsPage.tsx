@@ -381,22 +381,23 @@ export default function WithdrawalsPage({
 
     const ids = [...selectedIds];
 
-    // Close confirm immediately so it cannot reopen after loading
+    // Close confirm and clear selection immediately
     confirmOpenRef.current = false;
     setConfirmDialog(null);
     setRejectReason("");
+    setSelectedIds([]);
+    setSelectedMeta({});
 
     try {
       setBulkLoading(true);
       await bulkApproveWithdrawals(ids);
-      setSelectedIds([]);
-      setSelectedMeta({});
-      await loadData();
     } catch (err) {
       console.error(err);
     } finally {
       setBulkLoading(false);
       confirmOpenRef.current = false;
+      // Always reload list after approve attempt (ignore stale poll races)
+      await loadData({ force: true });
     }
   };
 
@@ -448,12 +449,12 @@ export default function WithdrawalsPage({
       }
 
       setRejectReason("");
-      await loadData();
     } catch (err) {
       console.error(err);
     } finally {
       setStatusActionLoading(false);
       confirmOpenRef.current = false;
+      await loadData({ force: true });
     }
   };
 
@@ -462,6 +463,7 @@ export default function WithdrawalsPage({
     checkNew?: boolean;
     signal?: AbortSignal;
     requestId?: number;
+    force?: boolean;
   }) {
     const requestId = options?.requestId ?? ++requestIdRef.current;
 
@@ -482,11 +484,20 @@ export default function WithdrawalsPage({
         startDate,
         endDate,
         dateSort,
-        options?.signal
+        options?.force ? undefined : options?.signal
       );
 
-      if (options?.signal?.aborted || requestId !== requestIdRef.current) {
+      if (options?.signal?.aborted && !options?.force) {
         return;
+      }
+
+      // Drop outdated poll/filter responses, but always apply forced refreshes
+      if (!options?.force && requestId !== requestIdRef.current) {
+        return;
+      }
+
+      if (options?.force) {
+        requestIdRef.current = requestId;
       }
 
       const payload = response as typeof response & {
@@ -518,14 +529,17 @@ export default function WithdrawalsPage({
       hasLoadedOnce.current = true;
     } catch (err) {
       if (
-        options?.signal?.aborted ||
-        (axios.isAxiosError(err) && err.code === "ERR_CANCELED")
+        !options?.force &&
+        (options?.signal?.aborted ||
+          (axios.isAxiosError(err) && err.code === "ERR_CANCELED"))
       ) {
         return;
       }
       console.error(err);
     } finally {
-      if (
+      if (options?.force) {
+        setLoading(false);
+      } else if (
         !options?.silent &&
         requestId === requestIdRef.current &&
         !options?.signal?.aborted

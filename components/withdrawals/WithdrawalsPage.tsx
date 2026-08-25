@@ -91,6 +91,10 @@ function getWalletFilterOptions(website: string) {
   return DEFAULT_WALLET_OPTIONS;
 }
 
+function getOrganisation(row: Withdrawal): string {
+  return (row.organisation || "").trim();
+}
+
 function walletBadgeVariant(
   walletType: string
 ): "success" | "info" | "warning" | "danger" | "secondary" {
@@ -687,6 +691,7 @@ export default function WithdrawalsPage({
     const { date, time } = formatToIST(row.createdAt);
     const tokenValue = (row.token || "").toLowerCase();
     const expanded = expandedIds.has(row._id);
+    const organisation = getOrganisation(row);
 
     return (
       <div
@@ -729,6 +734,14 @@ export default function WithdrawalsPage({
                 <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                   {row.email}
                 </p>
+                {organisation ? (
+                  <p
+                    className="truncate text-xs font-medium text-violet-500 dark:text-violet-300"
+                    title={organisation}
+                  >
+                    {organisation}
+                  </p>
+                ) : null}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 <Badge variant={statusBadgeVariant(row.status)}>
@@ -850,35 +863,47 @@ export default function WithdrawalsPage({
       title: "Customer",
       width: "minmax(180px, 1.4fr)",
       truncate: false,
-      render: (row) => (
-        <div className="flex items-center gap-3 min-w-0">
-          <input
-            type="checkbox"
-            checked={selectedIds.includes(row._id)}
-            onChange={() => toggleSelect(row)}
-            className="h-4 w-4 shrink-0 rounded border-slate-300 accent-indigo-500"
-          />
-          <div
-            className={`h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${avatarColor(row.name)}`}
-          >
-            {getInitials(row.name)}
-          </div>
-          <div className="min-w-0">
+      render: (row) => {
+        const organisation = getOrganisation(row);
+
+        return (
+          <div className="flex items-center gap-3 min-w-0">
+            <input
+              type="checkbox"
+              checked={selectedIds.includes(row._id)}
+              onChange={() => toggleSelect(row)}
+              className="h-4 w-4 shrink-0 rounded border-slate-300 accent-indigo-500"
+            />
             <div
-              className="text-sm font-semibold text-slate-900 dark:text-white truncate"
-              title={row.name}
+              className={`h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${avatarColor(row.name)}`}
             >
-              {row.name}
+              {getInitials(row.name)}
             </div>
-            <div
-              className="text-xs text-slate-500 dark:text-slate-300 truncate"
-              title={row.email}
-            >
-              {row.email}
+            <div className="min-w-0">
+              <div
+                className="text-sm font-semibold text-slate-900 dark:text-white truncate"
+                title={row.name}
+              >
+                {row.name}
+              </div>
+              <div
+                className="text-xs text-slate-500 dark:text-slate-300 truncate"
+                title={row.email}
+              >
+                {row.email}
+              </div>
+              {organisation ? (
+                <div
+                  className="text-xs font-medium text-violet-500 dark:text-violet-300 truncate"
+                  title={organisation}
+                >
+                  {organisation}
+                </div>
+              ) : null}
             </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "amount",

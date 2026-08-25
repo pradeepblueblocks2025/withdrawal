@@ -68,6 +68,11 @@ export default function WithdrawalDetailsModal({
             />
 
             <Info
+              title="Organisation"
+              value={withdrawal.organisation || "—"}
+            />
+
+            <Info
               title="Amount"
               value={Number(withdrawal.amount).toFixed(2)}
             />

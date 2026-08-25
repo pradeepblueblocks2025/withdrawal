@@ -3,6 +3,7 @@ export interface Withdrawal {
   withdrawalId: string;
   name: string;
   email: string;
+  organisation?: string;
   amount: number;
   walletType: string;
   walletAddress: string;

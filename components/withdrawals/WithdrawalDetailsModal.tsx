@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Copy } from "lucide-react";
+import { X, Copy, BadgeCheck } from "lucide-react";
 import Badge from "@/components/common/Badge";
 import { Withdrawal } from "@/types/withdrawal";
 import { formatToIST } from "@/lib/date";
@@ -57,10 +57,19 @@ export default function WithdrawalDetailsModal({
 
           <div className="grid grid-cols-2 gap-5">
 
-            <Info
-              title="Customer"
-              value={withdrawal.name}
-            />
+            <div>
+              <p className="text-xs text-slate-500 mb-1">Customer</p>
+              <p className="font-medium flex items-center gap-1.5">
+                {withdrawal.name}
+                {withdrawal.verified ? (
+                  <BadgeCheck
+                    size={16}
+                    className="shrink-0 text-sky-500"
+                    aria-label="Verified"
+                  />
+                ) : null}
+              </p>
+            </div>
 
             <Info
               title="Email"

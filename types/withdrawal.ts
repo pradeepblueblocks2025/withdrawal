@@ -4,6 +4,7 @@ export interface Withdrawal {
   name: string;
   email: string;
   organisation?: string;
+  verified?: boolean;
   amount: number;
   walletType: string;
   walletAddress: string;

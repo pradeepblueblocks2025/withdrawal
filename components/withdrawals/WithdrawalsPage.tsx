@@ -21,6 +21,7 @@ import {
   PauseCircle,
   XCircle,
   ChevronDown,
+  BadgeCheck,
 } from "lucide-react";
 
 import { Withdrawal } from "@/types/withdrawal";
@@ -93,6 +94,10 @@ function getWalletFilterOptions(website: string) {
 
 function getOrganisation(row: Withdrawal): string {
   return (row.organisation || "").trim();
+}
+
+function isVerified(row: Withdrawal): boolean {
+  return Boolean(row.verified);
 }
 
 function walletBadgeVariant(
@@ -728,8 +733,15 @@ export default function WithdrawalsPage({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                  {row.name}
+                <p className="flex items-center gap-1 truncate text-sm font-semibold text-slate-900 dark:text-white">
+                  <span className="truncate">{row.name}</span>
+                  {isVerified(row) && (
+                    <BadgeCheck
+                      size={15}
+                      className="shrink-0 text-sky-500"
+                      aria-label="Verified"
+                    />
+                  )}
                 </p>
                 <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                   {row.email}
@@ -881,10 +893,17 @@ export default function WithdrawalsPage({
             </div>
             <div className="min-w-0">
               <div
-                className="text-sm font-semibold text-slate-900 dark:text-white truncate"
+                className="flex items-center gap-1 text-sm font-semibold text-slate-900 dark:text-white"
                 title={row.name}
               >
-                {row.name}
+                <span className="truncate">{row.name}</span>
+                {isVerified(row) && (
+                  <BadgeCheck
+                    size={15}
+                    className="shrink-0 text-sky-500"
+                    aria-label="Verified"
+                  />
+                )}
               </div>
               <div
                 className="text-xs text-slate-500 dark:text-slate-300 truncate"

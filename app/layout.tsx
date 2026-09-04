@@ -11,7 +11,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "FortuneNFT Admin",
+  title: "Withdrawals - FortuneNFT",
   description: "Admin Dashboard",
   icons: {
     icon: [

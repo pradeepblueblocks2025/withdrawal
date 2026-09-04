@@ -7,28 +7,33 @@ import { login } from "@/services/auth.service";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import PatternLock from "@/components/PatternLock";
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [patternKey, setPatternKey] = useState(0);
 
   const [form, setForm] = useState({
     email: "",
     password: "",
     totpCode: "",
     captcha: "",
-    pattern: "15368",
+    pattern: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!form.pattern || form.pattern.length < 4) {
+      alert("Please draw your unlock pattern");
+      return;
+    }
+
     try {
       setLoading(true);
 
       const res = await login(form);
-
-      console.log(res);
 
       localStorage.setItem("admin_token", res.token);
       localStorage.setItem(
@@ -39,14 +44,14 @@ export default function LoginPage() {
       Cookies.set("admin_token", res.token, {
         expires: 7,
         sameSite: "strict",
-        secure: false, // true in production with HTTPS
+        secure: false,
       });
-
-      console.log("Stored:", localStorage.getItem("admin_token"));
 
       router.push("/dashboard");
     } catch (err: any) {
       alert(err.response?.data?.message || "Login Failed");
+      setForm((prev) => ({ ...prev, pattern: "" }));
+      setPatternKey((key) => key + 1);
     } finally {
       setLoading(false);
     }
@@ -92,17 +97,17 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-center bg-slate-50 dark:bg-[#101c2e] p-12">
+        <div className="flex items-center justify-center bg-slate-50 dark:bg-[#101c2e] p-8 sm:p-12">
           <div className="w-full max-w-md">
             <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
               Sign In
             </h2>
 
-            <p className="text-slate-500 dark:text-gray-400 mb-10">
+            <p className="text-slate-500 dark:text-gray-400 mb-8">
               Enter your credentials below
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="text-sm text-slate-600 dark:text-gray-300 mb-2 block">
                   Email Address
@@ -129,6 +134,7 @@ export default function LoginPage() {
                     name="email"
                     value={form.email}
                     onChange={handleChange}
+                    required
                   />
                 </div>
               </div>
@@ -159,6 +165,7 @@ export default function LoginPage() {
                     placeholder="Password"
                     value={form.password}
                     onChange={handleChange}
+                    required
                   />
                 </div>
               </div>
@@ -189,13 +196,42 @@ export default function LoginPage() {
                     placeholder="Authentication Password"
                     value={form.totpCode}
                     onChange={handleChange}
+                    required
                   />
                 </div>
               </div>
 
+              <div>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="text-sm text-slate-600 dark:text-gray-300">
+                    Draw Pattern
+                  </label>
+                  {form.pattern ? (
+                    <span className="text-xs font-medium text-emerald-500">
+                      Pattern set ({form.pattern.length} dots)
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-400">
+                      Connect at least 4 dots
+                    </span>
+                  )}
+                </div>
+
+                <PatternLock
+                  key={patternKey}
+                  onChange={(pattern) =>
+                    setForm((prev) => ({ ...prev, pattern }))
+                  }
+                  onComplete={(pattern) =>
+                    setForm((prev) => ({ ...prev, pattern }))
+                  }
+                />
+              </div>
+
               <button
-                disabled={loading}
-                className="w-full h-14 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:scale-[1.02] duration-300 disabled:opacity-60"
+                type="submit"
+                disabled={loading || form.pattern.length < 4}
+                className="w-full h-14 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:scale-[1.02] duration-300 disabled:opacity-60 disabled:hover:scale-100"
               >
                 {loading ? "Signing In..." : "Login"}
               </button>

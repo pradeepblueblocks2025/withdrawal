@@ -1,6 +1,33 @@
 import api from "@/lib/axios";
 import { WithdrawalResponse } from "@/types/withdrawal";
 
+export type ExportPeriod =
+  | "today"
+  | "this_week"
+  | "this_month"
+  | "last_3_months"
+  | "last_6_months"
+  | "this_year"
+  | "custom";
+
+/** Maps any date-range filter value → export/list period */
+export const DATE_RANGE_TO_EXPORT_PERIOD: Record<string, ExportPeriod> = {
+  today: "today",
+  this_week: "this_week",
+  this_month: "this_month",
+  last_3_months: "last_3_months",
+  last_6_months: "last_6_months",
+  this_year: "this_year",
+  custom: "custom",
+  // legacy values
+  daily: "today",
+  weekly: "this_week",
+  monthly: "this_month",
+  "3months": "last_3_months",
+  "6months": "last_6_months",
+  year: "this_year",
+};
+
 export const getWithdrawals = async (
   page = 1,
   limit = 10,
@@ -15,6 +42,10 @@ export const getWithdrawals = async (
   dateSort = "",
   signal?: AbortSignal,
 ): Promise<WithdrawalResponse> => {
+  const period = dateRange
+    ? DATE_RANGE_TO_EXPORT_PERIOD[dateRange] || dateRange
+    : "";
+
   const response = await api.get("/admin/api/v2/allwithdrawals", {
     signal,
     params: {
@@ -25,7 +56,8 @@ export const getWithdrawals = async (
       walletType,
       website,
       token,
-      dateRange,
+      dateRange: period || dateRange,
+      ...(period ? { period } : {}),
       startDate,
       endDate,
       ...(dateSort ? { dateSort } : {}),
@@ -47,26 +79,6 @@ export const bulkApproveWithdrawals = async (
   return response.data;
 };
 
-export type ExportPeriod =
-  | "today"
-  | "this_week"
-  | "this_month"
-  | "last_3_months"
-  | "last_6_months"
-  | "this_year"
-  | "custom";
-
-/** Maps withdrawals list dateRange filter values → export API period */
-export const DATE_RANGE_TO_EXPORT_PERIOD: Record<string, ExportPeriod> = {
-  daily: "today",
-  weekly: "this_week",
-  monthly: "this_month",
-  "3months": "last_3_months",
-  "6months": "last_6_months",
-  year: "this_year",
-  custom: "custom",
-};
-
 function getExportFilename(contentDisposition?: string, fallback = "withdrawals-export.xlsx") {
   if (!contentDisposition) return fallback;
   const utfMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
@@ -85,21 +97,28 @@ export const exportWithdrawals = async (params: {
   status?: string;
   walletType?: string;
   token?: string;
+  dateSort?: string;
 }): Promise<void> => {
+  // Use the same filter params as the list API so counts match
   const response = await api.get("/admin/api/v2/allwithdrawals/export", {
     params: {
       period: params.period,
+      dateRange: params.period,
       website: params.website,
+      search: params.search ?? "",
+      status: params.status ?? "",
+      walletType: params.walletType ?? "",
+      token: params.token ?? "",
+      ...(params.dateSort ? { dateSort: params.dateSort } : {}),
       ...(params.period === "custom"
         ? {
-            startDate: params.startDate,
-            endDate: params.endDate,
+            startDate: params.startDate ?? "",
+            endDate: params.endDate ?? "",
           }
-        : {}),
-      ...(params.search ? { search: params.search } : {}),
-      ...(params.status ? { status: params.status } : {}),
-      ...(params.walletType ? { walletType: params.walletType } : {}),
-      ...(params.token ? { token: params.token } : {}),
+        : {
+            startDate: "",
+            endDate: "",
+          }),
     },
     responseType: "blob",
     timeout: 120_000,

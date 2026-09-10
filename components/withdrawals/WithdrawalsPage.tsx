@@ -413,6 +413,7 @@ export default function WithdrawalsPage({
         status,
         walletType,
         token,
+        dateSort,
       });
     } catch (err) {
       console.error(err);
@@ -1121,12 +1122,12 @@ export default function WithdrawalsPage({
             onChange: handleDateRangeChange,
             options: [
               { label: "All", value: "" },
-              { label: "Today", value: "daily" },
-              { label: "This Week", value: "weekly" },
-              { label: "This Month", value: "monthly" },
-              { label: "Last 3 Months", value: "3months" },
-              { label: "Last 6 Months", value: "6months" },
-              { label: "This Year", value: "year" },
+              { label: "Today", value: "today" },
+              { label: "This Week", value: "this_week" },
+              { label: "This Month", value: "this_month" },
+              { label: "Last 3 Months", value: "last_3_months" },
+              { label: "Last 6 Months", value: "last_6_months" },
+              { label: "This Year", value: "this_year" },
               { label: "Custom", value: "custom" },
             ],
           },

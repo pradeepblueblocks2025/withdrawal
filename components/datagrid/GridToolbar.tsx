@@ -33,6 +33,7 @@ interface GridToolbarProps {
   filters?: SelectFilter[];
   onRefresh?: () => void;
   onExport?: () => void;
+  exportLoading?: boolean;
   children?: React.ReactNode;
 }
 
@@ -77,6 +78,7 @@ export default function GridToolbar({
   filters = [],
   onRefresh,
   onExport,
+  exportLoading = false,
   children,
 }: GridToolbarProps) {
   const [showFilters, setShowFilters] = useState(false);
@@ -171,10 +173,11 @@ export default function GridToolbar({
             <button
               type="button"
               onClick={onExport}
-              className="inline-flex h-10 sm:h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 px-3 sm:px-5 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(124,58,237,0.35)] transition hover:opacity-95"
+              disabled={exportLoading}
+              className="inline-flex h-10 sm:h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-500 px-3 sm:px-5 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(124,58,237,0.35)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Download size={16} />
-              Export
+              <Download size={16} className={exportLoading ? "animate-pulse" : ""} />
+              {exportLoading ? "Exporting..." : "Export"}
             </button>
           </div>
         </div>

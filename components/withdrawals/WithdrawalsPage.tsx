@@ -27,6 +27,8 @@ import {
 import { Withdrawal } from "@/types/withdrawal";
 import {
   bulkApproveWithdrawals,
+  DATE_RANGE_TO_EXPORT_PERIOD,
+  exportWithdrawals,
   getWithdrawals,
   updateWithdrawalStatus,
 } from "@/services/withdrawal.service";
@@ -193,6 +195,7 @@ export default function WithdrawalsPage({
   } | null>(null);
 
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [statusActionLoading, setStatusActionLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<
     | { type: "bulk-approve" }
@@ -382,6 +385,42 @@ export default function WithdrawalsPage({
     if (value !== "custom") {
       setStartDate("");
       setEndDate("");
+    }
+  };
+
+  const handleExport = async () => {
+    if (exportLoading) return;
+
+    const period = DATE_RANGE_TO_EXPORT_PERIOD[dateRange];
+    if (!period) {
+      alert("Please select a date range before exporting.");
+      return;
+    }
+
+    if (period === "custom" && (!startDate || !endDate)) {
+      alert("Please select both start and end dates for a custom export.");
+      return;
+    }
+
+    try {
+      setExportLoading(true);
+      await exportWithdrawals({
+        period,
+        website,
+        startDate,
+        endDate,
+        search: debouncedSearch,
+        status,
+        walletType,
+        token,
+      });
+    } catch (err) {
+      console.error(err);
+      const message =
+        err instanceof Error ? err.message : "Failed to export withdrawals";
+      alert(message);
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -1096,7 +1135,8 @@ export default function WithdrawalsPage({
           await unlockNotificationSound();
           await loadData({ checkNew: true });
         }}
-        onExport={() => {}}
+        onExport={handleExport}
+        exportLoading={exportLoading}
       >
         {dateRange === "custom" && (
           <>

@@ -164,7 +164,7 @@ export async function createCustomerLoginToken(
 ): Promise<string> {
   const client = getApiClient(website);
   const response = await client.post(
-    `/admin/api/v2/v2/logincustomer/${customerId}`
+    `/admin/api/v2/logincustomer/${customerId}`
   );
   const token = pickLoginToken(response.data);
 

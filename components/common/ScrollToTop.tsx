@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const SHOW_TOP_AFTER_PX = 320;
-const NEAR_BOTTOM_PX = 120;
+const SHOW_TOP_AFTER_PX = 200;
+const NEAR_BOTTOM_PX = 80;
 
 const buttonClass = `
   flex h-10 w-10 items-center justify-center
@@ -23,28 +23,64 @@ export default function ScrollToTop() {
 
   useEffect(() => {
     const update = () => {
-      const scrollY = window.scrollY;
-      const viewport = window.innerHeight;
-      const fullHeight = document.documentElement.scrollHeight;
-      const distanceFromBottom = fullHeight - (scrollY + viewport);
+      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      const viewport = window.innerHeight || 0;
+      const fullHeight = Math.max(
+        document.documentElement.scrollHeight,
+        document.body?.scrollHeight || 0
+      );
+      const maxScroll = Math.max(fullHeight - viewport, 0);
+      const distanceFromBottom = maxScroll - scrollY;
 
       setShowTop(scrollY > SHOW_TOP_AFTER_PX);
-      setShowBottom(fullHeight > viewport + NEAR_BOTTOM_PX && distanceFromBottom > NEAR_BOTTOM_PX);
+      // Show down arrow whenever there is more content below
+      setShowBottom(maxScroll > NEAR_BOTTOM_PX && distanceFromBottom > NEAR_BOTTOM_PX);
     };
 
     update();
+
+    // Content often loads after mount (tables, cards) — re-check height changes
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => update())
+        : null;
+    resizeObserver?.observe(document.documentElement);
+    if (document.body) resizeObserver?.observe(document.body);
+
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
+
+    const intervalId = window.setInterval(update, 1000);
+
     return () => {
+      resizeObserver?.disconnect();
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
+      window.clearInterval(intervalId);
     };
   }, []);
 
   if (!showTop && !showBottom) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2">
+    <div className="fixed bottom-5 right-5 z-[60] flex flex-col-reverse gap-2">
+      {showBottom && (
+        <button
+          type="button"
+          aria-label="Scroll to bottom"
+          onClick={() => {
+            const top = Math.max(
+              document.documentElement.scrollHeight,
+              document.body?.scrollHeight || 0
+            );
+            window.scrollTo({ top, behavior: "smooth" });
+          }}
+          className={buttonClass}
+        >
+          <ChevronDown size={20} strokeWidth={2.5} />
+        </button>
+      )}
+
       {showTop && (
         <button
           type="button"
@@ -55,22 +91,6 @@ export default function ScrollToTop() {
           className={buttonClass}
         >
           <ChevronUp size={20} strokeWidth={2.5} />
-        </button>
-      )}
-
-      {showBottom && (
-        <button
-          type="button"
-          aria-label="Scroll to bottom"
-          onClick={() => {
-            window.scrollTo({
-              top: document.documentElement.scrollHeight,
-              behavior: "smooth",
-            });
-          }}
-          className={buttonClass}
-        >
-          <ChevronDown size={20} strokeWidth={2.5} />
         </button>
       )}
     </div>

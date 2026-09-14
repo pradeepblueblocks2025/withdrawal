@@ -22,6 +22,7 @@ import {
   XCircle,
   ChevronDown,
   BadgeCheck,
+  LogIn,
 } from "lucide-react";
 
 import { Withdrawal } from "@/types/withdrawal";
@@ -32,6 +33,11 @@ import {
   getWithdrawals,
   updateWithdrawalStatus,
 } from "@/services/withdrawal.service";
+import {
+  canLoginAsCustomer,
+  getReferId,
+  loginAsCustomerFromWithdrawal,
+} from "@/services/customer-login.service";
 import { formatToIST } from "@/lib/date";
 import {
   isNotificationSoundUnlocked,
@@ -197,6 +203,9 @@ export default function WithdrawalsPage({
   const [bulkLoading, setBulkLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [statusActionLoading, setStatusActionLoading] = useState(false);
+  const [loginAsCustomerId, setLoginAsCustomerId] = useState<string | null>(
+    null
+  );
   const [confirmDialog, setConfirmDialog] = useState<
     | { type: "bulk-approve" }
     | { type: "hold"; withdrawal: Withdrawal }
@@ -655,12 +664,45 @@ export default function WithdrawalsPage({
     );
   };
 
+  const handleLoginAsCustomer = async (row: Withdrawal) => {
+    if (!canLoginAsCustomer(website)) {
+      alert("Customer login is not available for this website");
+      return;
+    }
+
+    const referid = getReferId(row);
+    if (!referid) {
+      alert("Refer id is missing for this withdrawal");
+      return;
+    }
+
+    if (loginAsCustomerId) return;
+
+    try {
+      setLoginAsCustomerId(row._id);
+      const redirectUrl = await loginAsCustomerFromWithdrawal({
+        referid,
+        website,
+      });
+      window.open(redirectUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      console.error(err);
+      const message =
+        err instanceof Error ? err.message : "Failed to login as customer";
+      alert(message);
+    } finally {
+      setLoginAsCustomerId(null);
+    }
+  };
+
   const renderRowActions = (row: Withdrawal, compact = false) => {
     const canChangeStatus =
       row.status === "pending" || row.status === "hold";
+    const showLoginAsCustomer = canLoginAsCustomer(website);
+    const isLoggingIn = loginAsCustomerId === row._id;
 
     return (
-      <div className={`flex items-center gap-2 ${compact ? "w-full" : ""}`}>
+      <div className={`flex items-center gap-2 ${compact ? "w-full flex-wrap" : ""}`}>
         <button
           type="button"
           onClick={(e) => {
@@ -673,6 +715,22 @@ export default function WithdrawalsPage({
         >
           <Eye size={16} />
         </button>
+
+        {showLoginAsCustomer && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              void handleLoginAsCustomer(row);
+            }}
+            disabled={isLoggingIn || Boolean(loginAsCustomerId)}
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-2.5 text-xs font-semibold text-sky-700 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-sky-400/30 dark:bg-sky-500/15 dark:text-sky-300 dark:hover:bg-sky-500/25"
+            title="Login as customer"
+          >
+            <LogIn size={14} className={isLoggingIn ? "animate-pulse" : ""} />
+            {compact ? (isLoggingIn ? "..." : "Login") : isLoggingIn ? "..." : "Login"}
+          </button>
+        )}
 
         {canChangeStatus && (
           <>
@@ -1075,7 +1133,7 @@ export default function WithdrawalsPage({
     {
       key: "actions",
       title: "Actions",
-      width: "220px",
+      width: "280px",
       truncate: false,
       render: (row) => renderRowActions(row),
     },

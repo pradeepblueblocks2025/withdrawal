@@ -48,10 +48,22 @@ function pickCustomerId(payload: unknown): string | null {
       ? (root.data as Record<string, unknown>)
       : root;
 
+  // Prefer nested userId._id from GET /withdrawal/{{referid}}
+  const nestedUserId =
+    data.userId && typeof data.userId === "object"
+      ? (data.userId as Record<string, unknown>)
+      : root.userId && typeof root.userId === "object"
+        ? (root.userId as Record<string, unknown>)
+        : null;
+  if (nestedUserId) {
+    const id = nestedUserId._id ?? nestedUserId.id;
+    if (typeof id === "string" && id.trim()) return id.trim();
+  }
+
   const directCandidates = [
     data.customerId,
     data.customerid,
-    data.userId,
+    typeof data.userId === "string" ? data.userId : null,
     data.userid,
     data.user_id,
     root.customerId,
